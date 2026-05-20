@@ -243,7 +243,7 @@ The widget applies these classes to `<html>` element:
 
 ## 📝 License
 
-MIT © David Zimmert
+MIT © Elephant Webdesign & Marketing GmbH
 
 ## 🤝 Contributing
 

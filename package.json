@@ -34,7 +34,7 @@
     "high-contrast",
     "color-blind"
   ],
-  "author": "David Zimmert",
+  "author": "Elephant Webdesign & Marketing GmbH",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -42,7 +42,7 @@
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
-    "access": "restricted"
+    "access": "public"
   },
   "peerDependencies": {
     "react": ">=18.0.0",
