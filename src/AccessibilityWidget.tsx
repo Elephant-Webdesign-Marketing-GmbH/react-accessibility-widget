@@ -153,37 +153,40 @@ export function AccessibilityWidget({
     // On mobile, center the dialog
     if (typeof window !== "undefined" && window.innerWidth < 768) {
       return {
-        margin: "auto",
+        margin: "1rem auto",
       };
     }
 
-    // On desktop, position next to widget
+    // On desktop, position next to widget with viewport constraints
     const styles: React.CSSProperties = {};
+    const minSpacing = 16; // Minimum spacing from viewport edge
+    const widgetSize = 56; // Widget button size
+    const dialogSpacing = 16; // Space between widget and dialog
     
     switch (position) {
       case "bottom-right":
         styles.marginLeft = "auto";
-        styles.marginRight = `${offsetX + 80}px`; // Widget width + some space
-        styles.marginBottom = `${offsetY}px`;
-        styles.marginTop = "auto";
+        styles.marginRight = `clamp(${minSpacing}px, ${offsetX + widgetSize + dialogSpacing}px, calc(100vw - 48rem - ${minSpacing}px))`;
+        styles.marginBottom = `clamp(${minSpacing}px, ${offsetY}px, calc(100vh - 85vh - ${minSpacing}px))`;
+        styles.marginTop = `clamp(${minSpacing}px, auto, calc(100vh - 85vh - ${minSpacing}px))`;
         break;
       case "bottom-left":
         styles.marginRight = "auto";
-        styles.marginLeft = `${offsetX + 80}px`;
-        styles.marginBottom = `${offsetY}px`;
-        styles.marginTop = "auto";
+        styles.marginLeft = `clamp(${minSpacing}px, ${offsetX + widgetSize + dialogSpacing}px, calc(100vw - 48rem - ${minSpacing}px))`;
+        styles.marginBottom = `clamp(${minSpacing}px, ${offsetY}px, calc(100vh - 85vh - ${minSpacing}px))`;
+        styles.marginTop = `clamp(${minSpacing}px, auto, calc(100vh - 85vh - ${minSpacing}px))`;
         break;
       case "top-right":
         styles.marginLeft = "auto";
-        styles.marginRight = `${offsetX + 80}px`;
-        styles.marginTop = `${offsetY}px`;
-        styles.marginBottom = "auto";
+        styles.marginRight = `clamp(${minSpacing}px, ${offsetX + widgetSize + dialogSpacing}px, calc(100vw - 48rem - ${minSpacing}px))`;
+        styles.marginTop = `clamp(${minSpacing}px, ${offsetY}px, calc(100vh - 85vh - ${minSpacing}px))`;
+        styles.marginBottom = `clamp(${minSpacing}px, auto, calc(100vh - 85vh - ${minSpacing}px))`;
         break;
       case "top-left":
         styles.marginRight = "auto";
-        styles.marginLeft = `${offsetX + 80}px`;
-        styles.marginTop = `${offsetY}px`;
-        styles.marginBottom = "auto";
+        styles.marginLeft = `clamp(${minSpacing}px, ${offsetX + widgetSize + dialogSpacing}px, calc(100vw - 48rem - ${minSpacing}px))`;
+        styles.marginTop = `clamp(${minSpacing}px, ${offsetY}px, calc(100vh - 85vh - ${minSpacing}px))`;
+        styles.marginBottom = `clamp(${minSpacing}px, auto, calc(100vh - 85vh - ${minSpacing}px))`;
         break;
     }
 
