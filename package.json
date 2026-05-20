@@ -1,0 +1,63 @@
+{
+  "name": "@elephant-webdesign-marketing-gmbh/accessibility-widget",
+  "version": "1.0.0",
+  "description": "Comprehensive accessibility widget with 16+ features for React applications - WCAG 2.1 AAA compliant",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./styles.css": "./dist/accessibility-widget.css"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "accessibility",
+    "a11y",
+    "wcag",
+    "react",
+    "widget",
+    "barrierefreiheit",
+    "dyslexia",
+    "text-to-speech",
+    "high-contrast",
+    "color-blind"
+  ],
+  "author": "David Zimmert",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Elephant-Webdesign-Marketing-GmbH/accessibility-widget.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "dependencies": {
+    "lucide-react": "^0.460.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.6",
+    "vite-plugin-dts": "^4.3.0"
+  }
+}

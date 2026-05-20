@@ -1,0 +1,472 @@
+/* =============== FONTS =============== */
+
+/* OpenDyslexic Font */
+@import url("https://fonts.googleapis.com/css2?family=OpenDyslexic:wght@400;700&display=swap");
+
+/* =============== ACCESSIBILITY WIDGET STYLES =============== */
+
+/* Floating Trigger Button */
+.a11y-widget-trigger {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  z-index: 9999;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.a11y-widget-trigger:hover {
+  background-color: #1d4ed8;
+  transform: scale(1.1);
+}
+
+.a11y-widget-trigger:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.a11y-widget-trigger-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* Dialog/Modal */
+.a11y-widget-dialog {
+  max-width: 48rem;
+  max-height: 85vh;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.a11y-widget-dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.a11y-widget-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: white;
+}
+
+/* Header */
+.a11y-widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.a11y-widget-header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.a11y-widget-header-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #2563eb;
+}
+
+.a11y-widget-header h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+.a11y-widget-close-btn {
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.a11y-widget-close-btn:hover {
+  background-color: #f3f4f6;
+}
+
+.a11y-widget-description {
+  padding: 0 1.5rem 1rem;
+  margin: 0;
+  color: #6b7280;
+  text-align: left;
+}
+
+/* Scroll Area */
+.a11y-widget-scroll-area {
+  overflow-y: auto;
+  padding: 1.5rem;
+  flex: 1;
+}
+
+/* Section */
+.a11y-widget-section {
+  margin-bottom: 1.5rem;
+}
+
+.a11y-widget-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: bold;
+  margin: 0 0 1rem 0;
+}
+
+.a11y-section-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #2563eb;
+}
+
+/* Control */
+.a11y-widget-control {
+  margin-bottom: 1rem;
+}
+
+.a11y-widget-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.a11y-label-icon {
+  width: 1rem;
+  height: 1rem;
+  color: #2563eb;
+}
+
+.a11y-widget-hint {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin: 0.5rem 0 0 0;
+}
+
+/* Control Row (for +/- buttons with value) */
+.a11y-widget-control-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.a11y-widget-value {
+  min-width: 5rem;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* Button Grid */
+.a11y-widget-button-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.a11y-widget-button-grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* Buttons */
+.a11y-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid #d1d5db;
+  background: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.a11y-btn:hover:not(:disabled) {
+  background-color: #f9fafb;
+}
+
+.a11y-btn:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.a11y-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.a11y-btn-outline {
+  background: white;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.a11y-btn-active {
+  background: #2563eb;
+  color: white;
+  border: 1px solid #2563eb;
+}
+
+.a11y-btn-active:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.a11y-btn-destructive {
+  background: #dc2626;
+  color: white;
+  border: 1px solid #dc2626;
+}
+
+.a11y-btn-destructive:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.a11y-btn-full {
+  width: 100%;
+}
+
+.a11y-btn-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.a11y-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Separator */
+.a11y-separator {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 1.5rem 0;
+}
+
+/* =============== FONT FAMILIES =============== */
+
+html.a11y-font-dyslexic,
+html.a11y-font-dyslexic * {
+  font-family: "OpenDyslexic", "Comic Sans MS", sans-serif !important;
+}
+
+html.a11y-font-arial,
+html.a11y-font-arial * {
+  font-family: Arial, Helvetica, sans-serif !important;
+}
+
+html.a11y-font-serif,
+html.a11y-font-serif * {
+  font-family: Georgia, "Times New Roman", serif !important;
+}
+
+/* =============== LINE HEIGHT =============== */
+
+html.a11y-line-height-relaxed * {
+  line-height: 1.75 !important;
+}
+
+html.a11y-line-height-loose * {
+  line-height: 2 !important;
+}
+
+/* =============== LETTER SPACING =============== */
+
+html.a11y-letter-spacing-wide * {
+  letter-spacing: 0.05em !important;
+}
+
+html.a11y-letter-spacing-wider * {
+  letter-spacing: 0.1em !important;
+}
+
+/* =============== CONTRAST MODES =============== */
+
+/* High Contrast Mode */
+html.a11y-contrast-high {
+  filter: contrast(1.5);
+}
+
+/* Dark Mode */
+html.a11y-contrast-dark {
+  background-color: #000 !important;
+  color: #fff !important;
+}
+
+html.a11y-contrast-dark * {
+  background-color: #000 !important;
+  color: #fff !important;
+  border-color: #fff !important;
+}
+
+html.a11y-contrast-dark img {
+  filter: brightness(0.8) contrast(1.2);
+}
+
+/* Yellow/Black High Contrast Mode */
+html.a11y-contrast-yellow-black {
+  background-color: #000 !important;
+  color: #ffff00 !important;
+}
+
+html.a11y-contrast-yellow-black * {
+  background-color: #000 !important;
+  color: #ffff00 !important;
+  border-color: #ffff00 !important;
+}
+
+html.a11y-contrast-yellow-black a {
+  color: #ffff00 !important;
+  text-decoration: underline !important;
+}
+
+html.a11y-contrast-yellow-black button {
+  background-color: #ffff00 !important;
+  color: #000 !important;
+  border: 2px solid #ffff00 !important;
+}
+
+/* =============== COLOR BLIND MODES =============== */
+
+/* Protanopia (Red-Blind) */
+html.a11y-colorblind-protanopia {
+  filter: url("#a11y-protanopia-filter");
+}
+
+/* Deuteranopia (Green-Blind) */
+html.a11y-colorblind-deuteranopia {
+  filter: url("#a11y-deuteranopia-filter");
+}
+
+/* Tritanopia (Blue-Blind) */
+html.a11y-colorblind-tritanopia {
+  filter: url("#a11y-tritanopia-filter");
+}
+
+/* Fallback if SVG filters not supported */
+@supports not (filter: url("#a11y-protanopia-filter")) {
+  html.a11y-colorblind-protanopia {
+    filter: hue-rotate(20deg) saturate(0.7);
+  }
+
+  html.a11y-colorblind-deuteranopia {
+    filter: hue-rotate(-20deg) saturate(0.7);
+  }
+
+  html.a11y-colorblind-tritanopia {
+    filter: hue-rotate(180deg) saturate(0.6);
+  }
+}
+
+/* =============== UI SCALE =============== */
+
+/* Scale buttons, icons, and interactive elements */
+button:not(.a11y-preserve-transform),
+a:not(.a11y-preserve-transform),
+[role="button"]:not(.a11y-preserve-transform),
+input:not(.a11y-preserve-transform),
+select:not(.a11y-preserve-transform),
+textarea:not(.a11y-preserve-transform) {
+  transform: scale(var(--a11y-ui-scale, 1)) !important;
+  transform-origin: center !important;
+}
+
+svg:not(.a11y-preserve-transform),
+img[src*="icon"]:not(.a11y-preserve-transform),
+.icon:not(.a11y-preserve-transform) {
+  transform: scale(var(--a11y-ui-scale, 1)) !important;
+}
+
+/* =============== FOCUS MODE =============== */
+
+html.a11y-focus-mode *:focus,
+html.a11y-focus-mode *:focus-visible {
+  outline: 4px solid #2563eb !important;
+  outline-offset: 4px !important;
+  box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.4) !important;
+  z-index: 9999 !important;
+  position: relative !important;
+}
+
+/* Exception: Keep widget button accessible */
+html.a11y-focus-mode .a11y-widget-trigger {
+  position: fixed !important;
+  pointer-events: auto !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 99999 !important;
+}
+
+html.a11y-focus-mode .a11y-widget-trigger:focus,
+html.a11y-focus-mode .a11y-widget-trigger:focus-visible {
+  outline: 2px solid #2563eb !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.3) !important;
+}
+
+/* =============== REDUCED MOTION =============== */
+
+/* Simulate prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+html.a11y-reduce-motion *,
+html.a11y-reduce-motion *::before,
+html.a11y-reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+  animation-play-state: paused !important;
+  transform: none !important;
+  opacity: 1 !important;
+}
+
+/* Specifically target Framer Motion elements */
+html.a11y-reduce-motion [data-framer-component-type],
+html.a11y-reduce-motion [style*="transform"],
+html.a11y-reduce-motion [class*="motion-"] {
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+}
+
+/* =============== TEXT SELECTION =============== */
+
+::selection {
+  background-color: #2563eb !important;
+  color: #fff !important;
+}
+
+::-moz-selection {
+  background-color: #2563eb !important;
+  color: #fff !important;
+}
