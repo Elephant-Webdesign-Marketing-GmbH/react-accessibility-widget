@@ -45,7 +45,7 @@ git commit -m "Initial commit: Accessibility Widget v1.0.0"
 ### 4. GitHub Repository erstellen
 
 1. Gehe zu: https://github.com/new
-2. Repository Name: `accessibility-widget`
+2. Repository Name: `react-accessibility-widget`
 3. **Organization:** Wähle `Elephant-Webdesign-Marketing-GmbH`
 4. Beschreibung: "Comprehensive accessibility widget for React - WCAG 2.1 AAA compliant"
 5. **WICHTIG:** Setze das Repo auf **Public** (für kostenloses GitHub Packages)
@@ -56,7 +56,7 @@ git commit -m "Initial commit: Accessibility Widget v1.0.0"
 
 ```bash
 # Remote hinzufügen
-git remote add origin https://github.com/Elephant-Webdesign-Marketing-GmbH/accessibility-widget.git
+git remote add origin https://github.com/Elephant-Webdesign-Marketing-GmbH/react-accessibility-widget.git
 
 # Branch umbenennen (falls nötig)
 git branch -M main
@@ -99,7 +99,7 @@ Die GitHub Action ist bereits konfiguriert (`.github/workflows/publish.yml`).
 
 **Option A: Via GitHub Release**
 
-1. Gehe zu: https://github.com/Elephant-Webdesign-Marketing-GmbH/accessibility-widget/releases/new
+1. Gehe zu: https://github.com/Elephant-Webdesign-Marketing-GmbH/react-accessibility-widget/releases/new
 2. Tag: `v1.0.0`
 3. Release title: `v1.0.0 - Initial Release`
 4. Beschreibung hinzufügen
@@ -108,7 +108,7 @@ Die GitHub Action ist bereits konfiguriert (`.github/workflows/publish.yml`).
 
 **Option B: Manuell triggern**
 
-1. Gehe zu: https://github.com/Elephant-Webdesign-Marketing-GmbH/accessibility-widget/actions
+1. Gehe zu: https://github.com/Elephant-Webdesign-Marketing-GmbH/react-accessibility-widget/actions
 2. Wähle "Publish to GitHub Packages"
 3. Klicke "Run workflow"
 
@@ -127,15 +127,15 @@ echo "@elephant-webdesign-marketing-gmbh:registry=https://npm.pkg.github.com
 2. Package installieren:
 
 ```bash
-npm install @elephant-webdesign-marketing-gmbh/accessibility-widget
+npm install @elephant-webdesign-marketing-gmbh/react-accessibility-widget
 ```
 
 3. Importieren:
 
 ```tsx
 // In deiner App
-import { AccessibilityWidget } from '@elephant-webdesign-marketing-gmbh/accessibility-widget';
-import '@elephant-webdesign-marketing-gmbh/accessibility-widget/styles.css';
+import { AccessibilityWidget } from '@elephant-webdesign-marketing-gmbh/react-accessibility-widget';
+import '@elephant-webdesign-marketing-gmbh/react-accessibility-widget/styles.css';
 
 function App() {
   return (
@@ -225,7 +225,7 @@ npm run build
 ## 🤝 Support
 
 Bei Problemen:
-- GitHub Issues: https://github.com/Elephant-Webdesign-Marketing-GmbH/accessibility-widget/issues
+- GitHub Issues: https://github.com/Elephant-Webdesign-Marketing-GmbH/react-accessibility-widget/issues
 - Email: [deine-email]
 
 ---

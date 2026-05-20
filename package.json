@@ -1,5 +1,5 @@
 {
-  "name": "@elephant-webdesign-marketing-gmbh/accessibility-widget",
+  "name": "@elephant-webdesign-marketing-gmbh/react-accessibility-widget",
   "version": "1.0.0",
   "description": "Comprehensive accessibility widget with 16+ features for React applications - WCAG 2.1 AAA compliant",
   "main": "./dist/index.js",
@@ -38,7 +38,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Elephant-Webdesign-Marketing-GmbH/accessibility-widget.git"
+    "url": "https://github.com/Elephant-Webdesign-Marketing-GmbH/react-accessibility-widget.git"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",

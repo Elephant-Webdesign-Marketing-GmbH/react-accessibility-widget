@@ -1,6 +1,6 @@
 # Accessibility Widget
 
-[![GitHub Package](https://img.shields.io/badge/GitHub-Package-blue)](https://github.com/Elephant-Webdesign-Marketing-GmbH/accessibility-widget)
+[![GitHub Package](https://img.shields.io/badge/GitHub-Package-blue)](https://github.com/Elephant-Webdesign-Marketing-GmbH/react-accessibility-widget)
 [![WCAG 2.1 AAA](https://img.shields.io/badge/WCAG%202.1-AAA-green)](https://www.w3.org/WAI/WCAG21/quickref/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -44,7 +44,7 @@ All settings are **automatically saved** to localStorage and restored on the nex
 2. Install the package:
 
 ```bash
-npm install @elephant-webdesign-marketing-gmbh/accessibility-widget
+npm install @elephant-webdesign-marketing-gmbh/react-accessibility-widget
 ```
 
 ### Creating a GitHub Token
@@ -59,8 +59,8 @@ npm install @elephant-webdesign-marketing-gmbh/accessibility-widget
 ### Basic Setup
 
 ```tsx
-import { AccessibilityWidget } from '@elephant-webdesign-marketing-gmbh/accessibility-widget';
-import '@elephant-webdesign-marketing-gmbh/accessibility-widget/styles.css';
+import { AccessibilityWidget } from '@elephant-webdesign-marketing-gmbh/react-accessibility-widget';
+import '@elephant-webdesign-marketing-gmbh/react-accessibility-widget/styles.css';
 
 export default function App() {
   return (
@@ -258,7 +258,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 🐛 Issues
 
-Found a bug or have a feature request? Please open an issue on [GitHub](https://github.com/Elephant-Webdesign-Marketing-GmbH/accessibility-widget/issues).
+Found a bug or have a feature request? Please open an issue on [GitHub](https://github.com/Elephant-Webdesign-Marketing-GmbH/react-accessibility-widget/issues).
 
 ---
 
