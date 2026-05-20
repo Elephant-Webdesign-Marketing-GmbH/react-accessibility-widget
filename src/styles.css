@@ -7,10 +7,7 @@
 
 /* Floating Trigger Button */
 .a11y-widget-trigger {
-  position: fixed;
-  right: 1.5rem;
-  bottom: 1.5rem;
-  z-index: 9999;
+  /* Position is set via inline styles for flexibility */
   width: 3.5rem;
   height: 3.5rem;
   border-radius: 50%;
@@ -48,6 +45,20 @@
   border-radius: 0.5rem;
   padding: 0;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Mobile: Center dialog */
+@media (max-width: 768px) {
+  .a11y-widget-dialog {
+    margin: auto !important;
+    max-width: 95vw;
+    max-height: 90vh;
+  }
+  
+  .a11y-widget-trigger {
+    width: 3rem;
+    height: 3rem;
+  }
 }
 
 .a11y-widget-dialog::backdrop {

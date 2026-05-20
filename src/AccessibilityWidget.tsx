@@ -17,6 +17,23 @@ import {
 import "./styles.css";
 
 /**
+ * Widget position on screen
+ */
+export type WidgetPosition = "bottom-right" | "bottom-left" | "top-right" | "top-left";
+
+/**
+ * Widget props for customization
+ */
+export interface AccessibilityWidgetProps {
+  /** Position of the floating button (default: "bottom-right") */
+  position?: WidgetPosition;
+  /** Horizontal offset in pixels (default: 24) */
+  offsetX?: number;
+  /** Vertical offset in pixels (default: 24) */
+  offsetY?: number;
+}
+
+/**
  * Accessibility settings that can be persisted
  */
 export interface AccessibilitySettings {
@@ -89,13 +106,89 @@ const STORAGE_KEY = "accessibility-settings";
  *
  * All settings are saved in localStorage and restored on next visit.
  */
-export function AccessibilityWidget() {
+export function AccessibilityWidget({
+  position = "bottom-right",
+  offsetX = 24,
+  offsetY = 24,
+}: AccessibilityWidgetProps = {}) {
   const [isOpen, setIsOpen] = useState(false);
   const [settings, setSettings] = useState<AccessibilitySettings>(DEFAULT_SETTINGS);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const speechSynthRef = useRef<SpeechSynthesisUtterance | null>(null);
   const isCancelledRef = useRef(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  // Calculate position styles for widget button
+  const getPositionStyles = (): React.CSSProperties => {
+    const styles: React.CSSProperties = {
+      position: "fixed",
+      zIndex: 9999,
+    };
+
+    switch (position) {
+      case "bottom-right":
+        styles.right = `${offsetX}px`;
+        styles.bottom = `${offsetY}px`;
+        break;
+      case "bottom-left":
+        styles.left = `${offsetX}px`;
+        styles.bottom = `${offsetY}px`;
+        break;
+      case "top-right":
+        styles.right = `${offsetX}px`;
+        styles.top = `${offsetY}px`;
+        break;
+      case "top-left":
+        styles.left = `${offsetX}px`;
+        styles.top = `${offsetY}px`;
+        break;
+    }
+
+    return styles;
+  };
+
+  // Calculate position styles for dialog (next to widget)
+  const getDialogStyles = (): React.CSSProperties => {
+    // On mobile, center the dialog
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      return {
+        margin: "auto",
+      };
+    }
+
+    // On desktop, position next to widget
+    const styles: React.CSSProperties = {};
+    
+    switch (position) {
+      case "bottom-right":
+        styles.marginLeft = "auto";
+        styles.marginRight = `${offsetX + 80}px`; // Widget width + some space
+        styles.marginBottom = `${offsetY}px`;
+        styles.marginTop = "auto";
+        break;
+      case "bottom-left":
+        styles.marginRight = "auto";
+        styles.marginLeft = `${offsetX + 80}px`;
+        styles.marginBottom = `${offsetY}px`;
+        styles.marginTop = "auto";
+        break;
+      case "top-right":
+        styles.marginLeft = "auto";
+        styles.marginRight = `${offsetX + 80}px`;
+        styles.marginTop = `${offsetY}px`;
+        styles.marginBottom = "auto";
+        break;
+      case "top-left":
+        styles.marginRight = "auto";
+        styles.marginLeft = `${offsetX + 80}px`;
+        styles.marginTop = `${offsetY}px`;
+        styles.marginBottom = "auto";
+        break;
+    }
+
+    return styles;
+  };
 
   // Load settings from localStorage on mount
   useEffect(() => {
@@ -408,8 +501,10 @@ export function AccessibilityWidget() {
     <>
       {/* Floating Button */}
       <button
+        ref={triggerRef}
         type="button"
         className="a11y-widget-trigger"
+        style={getPositionStyles()}
         onClick={() => setIsOpen(true)}
         aria-label="Open Accessibility Settings (Alt + A)"
         title="Open Accessibility Settings (Alt + A)"
@@ -421,6 +516,7 @@ export function AccessibilityWidget() {
       <dialog
         ref={dialogRef}
         className="a11y-widget-dialog"
+        style={getDialogStyles()}
         onClose={() => setIsOpen(false)}
         onClick={(e) => {
           // Close when clicking backdrop

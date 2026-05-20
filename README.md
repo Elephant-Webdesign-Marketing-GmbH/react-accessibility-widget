@@ -74,6 +74,29 @@ export default function App() {
 }
 ```
 
+### With Custom Position
+
+```tsx
+<AccessibilityWidget 
+  position="bottom-right"  // "bottom-right" | "bottom-left" | "top-right" | "top-left"
+  offsetX={24}            // Horizontal offset in pixels (default: 24)
+  offsetY={24}            // Vertical offset in pixels (default: 24)
+/>
+```
+
+### Examples
+
+```tsx
+// Bottom left, 100px from edges
+<AccessibilityWidget position="bottom-left" offsetX={100} offsetY={100} />
+
+// Top right, closer to edge
+<AccessibilityWidget position="top-right" offsetX={16} offsetY={16} />
+
+// Above footer
+<AccessibilityWidget position="bottom-right" offsetY={80} />
+```
+
 ### Next.js 13+ (App Router)
 
 ```tsx
@@ -195,6 +218,23 @@ This widget helps your application meet 16+ WCAG criteria:
 - **Cognitive Disabilities** - TTS, reduced motion
 
 ## 🔧 API Reference
+
+### AccessibilityWidget Props
+
+```typescript
+interface AccessibilityWidgetProps {
+  /** Position of the floating button (default: "bottom-right") */
+  position?: "bottom-right" | "bottom-left" | "top-right" | "top-left";
+  /** Horizontal offset in pixels (default: 24) */
+  offsetX?: number;
+  /** Vertical offset in pixels (default: 24) */
+  offsetY?: number;
+}
+```
+
+**Position Behavior:**
+- **Desktop:** Dialog appears next to the widget button
+- **Mobile (< 768px):** Dialog is always centered on screen
 
 ### AccessibilitySettings Interface
 
