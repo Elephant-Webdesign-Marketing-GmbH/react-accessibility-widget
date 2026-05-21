@@ -37,35 +37,31 @@
   height: 1.5rem;
 }
 
+/* Backdrop */
+.a11y-widget-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9998;
+}
+
 /* Dialog/Modal */
 .a11y-widget-dialog {
-  max-width: 48rem;
-  max-height: 85vh;
   border: none;
   border-radius: 0.5rem;
   padding: 0;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  /* Ensure dialog stays within viewport */
-  inset: 1rem;
+  background: white;
+  overflow: hidden;
+  z-index: 9999;
 }
 
-/* Mobile: Center dialog */
+/* Mobile: Smaller trigger button */
 @media (max-width: 768px) {
-  .a11y-widget-dialog {
-    margin: auto !important;
-    max-width: calc(100vw - 2rem);
-    max-height: calc(100vh - 2rem);
-    inset: 1rem;
-  }
-  
   .a11y-widget-trigger {
     width: 3rem;
     height: 3rem;
   }
-}
-
-.a11y-widget-dialog::backdrop {
-  background-color: rgba(0, 0, 0, 0.5);
 }
 
 .a11y-widget-content {

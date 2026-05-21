@@ -116,8 +116,8 @@ export function AccessibilityWidget({
   const [isSpeaking, setIsSpeaking] = useState(false);
   const speechSynthRef = useRef<SpeechSynthesisUtterance | null>(null);
   const isCancelledRef = useRef(false);
-  const dialogRef = useRef<HTMLDialogElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   // Calculate position styles for widget button
   const getPositionStyles = (): React.CSSProperties => {
@@ -150,44 +150,83 @@ export function AccessibilityWidget({
 
   // Calculate position styles for dialog (next to widget)
   const getDialogStyles = (): React.CSSProperties => {
-    // On mobile, center the dialog
+    // On mobile, dialog is centered
     if (typeof window !== "undefined" && window.innerWidth < 768) {
       return {
-        margin: "1rem auto",
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        maxWidth: 'calc(100vw - 2rem)',
+        maxHeight: 'calc(100vh - 2rem)',
       };
     }
 
     // On desktop, position next to widget with viewport constraints
-    const styles: React.CSSProperties = {};
-    const minSpacing = 16; // Minimum spacing from viewport edge
-    const widgetSize = 56; // Widget button size
-    const dialogSpacing = 16; // Space between widget and dialog
+    const minSpacing = 16; // Minimum distance from viewport edge
+    const widgetSize = 56;
+    const dialogSpacing = 16;
+    const dialogMaxWidth = 768; // 48rem = 768px
+    const dialogMaxHeight = window.innerHeight * 0.85;
+    
+    const styles: React.CSSProperties = {
+      position: 'absolute',
+      maxWidth: `${dialogMaxWidth}px`,
+      maxHeight: `${dialogMaxHeight}px`,
+    };
     
     switch (position) {
-      case "bottom-right":
-        styles.marginLeft = "auto";
-        styles.marginRight = `clamp(${minSpacing}px, ${offsetX + widgetSize + dialogSpacing}px, calc(100vw - 48rem - ${minSpacing}px))`;
-        styles.marginBottom = `clamp(${minSpacing}px, ${offsetY}px, calc(100vh - 85vh - ${minSpacing}px))`;
-        styles.marginTop = `clamp(${minSpacing}px, auto, calc(100vh - 85vh - ${minSpacing}px))`;
+      case "bottom-right": {
+        // Position to the left of the widget
+        const right = offsetX + widgetSize + dialogSpacing;
+        // Ensure dialog doesn't go beyond left edge
+        const maxRight = window.innerWidth - dialogMaxWidth - minSpacing;
+        styles.right = `${Math.min(right, maxRight)}px`;
+        
+        // Position at the same bottom level as widget
+        const bottom = offsetY;
+        // Ensure dialog doesn't go beyond top edge
+        const maxBottom = window.innerHeight - dialogMaxHeight - minSpacing;
+        styles.bottom = `${Math.min(bottom, maxBottom)}px`;
         break;
-      case "bottom-left":
-        styles.marginRight = "auto";
-        styles.marginLeft = `clamp(${minSpacing}px, ${offsetX + widgetSize + dialogSpacing}px, calc(100vw - 48rem - ${minSpacing}px))`;
-        styles.marginBottom = `clamp(${minSpacing}px, ${offsetY}px, calc(100vh - 85vh - ${minSpacing}px))`;
-        styles.marginTop = `clamp(${minSpacing}px, auto, calc(100vh - 85vh - ${minSpacing}px))`;
+      }
+      case "bottom-left": {
+        // Position to the right of the widget
+        const left = offsetX + widgetSize + dialogSpacing;
+        // Ensure dialog doesn't go beyond right edge
+        const maxLeft = window.innerWidth - dialogMaxWidth - minSpacing;
+        styles.left = `${Math.min(left, maxLeft)}px`;
+        
+        // Position at the same bottom level as widget
+        const bottom = offsetY;
+        const maxBottom = window.innerHeight - dialogMaxHeight - minSpacing;
+        styles.bottom = `${Math.min(bottom, maxBottom)}px`;
         break;
-      case "top-right":
-        styles.marginLeft = "auto";
-        styles.marginRight = `clamp(${minSpacing}px, ${offsetX + widgetSize + dialogSpacing}px, calc(100vw - 48rem - ${minSpacing}px))`;
-        styles.marginTop = `clamp(${minSpacing}px, ${offsetY}px, calc(100vh - 85vh - ${minSpacing}px))`;
-        styles.marginBottom = `clamp(${minSpacing}px, auto, calc(100vh - 85vh - ${minSpacing}px))`;
+      }
+      case "top-right": {
+        // Position to the left of the widget
+        const right = offsetX + widgetSize + dialogSpacing;
+        const maxRight = window.innerWidth - dialogMaxWidth - minSpacing;
+        styles.right = `${Math.min(right, maxRight)}px`;
+        
+        // Position at the same top level as widget
+        const top = offsetY;
+        const maxTop = window.innerHeight - dialogMaxHeight - minSpacing;
+        styles.top = `${Math.min(top, maxTop)}px`;
         break;
-      case "top-left":
-        styles.marginRight = "auto";
-        styles.marginLeft = `clamp(${minSpacing}px, ${offsetX + widgetSize + dialogSpacing}px, calc(100vw - 48rem - ${minSpacing}px))`;
-        styles.marginTop = `clamp(${minSpacing}px, ${offsetY}px, calc(100vh - 85vh - ${minSpacing}px))`;
-        styles.marginBottom = `clamp(${minSpacing}px, auto, calc(100vh - 85vh - ${minSpacing}px))`;
+      }
+      case "top-left": {
+        // Position to the right of the widget
+        const left = offsetX + widgetSize + dialogSpacing;
+        const maxLeft = window.innerWidth - dialogMaxWidth - minSpacing;
+        styles.left = `${Math.min(left, maxLeft)}px`;
+        
+        // Position at the same top level as widget
+        const top = offsetY;
+        const maxTop = window.innerHeight - dialogMaxHeight - minSpacing;
+        styles.top = `${Math.min(top, maxTop)}px`;
         break;
+      }
     }
 
     return styles;
@@ -207,16 +246,16 @@ export function AccessibilityWidget({
     }
   }, []);
 
-  // Manage dialog open/close
+  // Handle body scroll lock when modal is open
   useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-
     if (isOpen) {
-      dialog.showModal();
+      document.body.style.overflow = 'hidden';
     } else {
-      dialog.close();
+      document.body.style.overflow = '';
     }
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, [isOpen]);
 
   // Keyboard shortcut to open/close widget: Alt + A
@@ -516,24 +555,30 @@ export function AccessibilityWidget({
       </button>
 
       {/* Dialog/Modal */}
-      <dialog
-        ref={dialogRef}
-        className="a11y-widget-dialog"
-        style={getDialogStyles()}
-        onClose={() => setIsOpen(false)}
-        onClick={(e) => {
-          // Close when clicking backdrop
-          if (e.target === dialogRef.current) {
-            setIsOpen(false);
-          }
-        }}
-      >
+      {isOpen && (
+        <div
+          className="a11y-widget-backdrop"
+          onClick={(e) => {
+            // Close when clicking backdrop
+            if (e.target === e.currentTarget) {
+              setIsOpen(false);
+            }
+          }}
+        >
+          <div
+            ref={modalRef}
+            className="a11y-widget-dialog"
+            style={getDialogStyles()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="a11y-widget-title"
+          >
         <div className="a11y-widget-content">
           {/* Header */}
           <div className="a11y-widget-header">
             <div className="a11y-widget-header-title">
               <PersonStanding className="a11y-widget-header-icon" aria-hidden="true" />
-              <h2>Accessibility Settings</h2>
+              <h2 id="a11y-widget-title">Accessibility Settings</h2>
             </div>
             <button
               type="button"
@@ -969,7 +1014,9 @@ export function AccessibilityWidget({
             </div>
           </div>
         </div>
-      </dialog>
+          </div>
+        </div>
+      )}
 
       {/* SVG Color Blind Filters */}
       <svg style={{ position: "absolute", width: 0, height: 0 }} aria-hidden="true">
