@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, forwardRef, useImperativeHandle, useCallback } from "react";
+import { createPortal } from "react-dom";
 import {
   X,
   PersonStanding,
@@ -17,6 +18,8 @@ import {
 import "./styles.css";
 import { FontSizeScalingMode } from "./enums/FontSizeScalingMode";
 import { SpeechReadMode } from "./enums/SpeechReadMode";
+import { A11Y_WIDGET_Z_INDEX } from "./constants/A11yZIndex";
+import { WIDGET_VERSION } from "./constants/WidgetVersion";
 import { applyFontSizeScaling } from "./fontSize/applyFontSizeScaling";
 import { detectFontSizeScalingMode } from "./fontSize/detectFontSizeScalingMode";
 import { mapLanguageToBCP47 } from "./speech/speechSynthesisBrowserFixes";
@@ -230,10 +233,7 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
 
   // Calculate position styles for widget button
   const getPositionStyles = (): React.CSSProperties => {
-    const styles: React.CSSProperties = {
-      position: "fixed",
-      zIndex: 9999,
-    };
+    const styles: React.CSSProperties = {};
 
     switch (position) {
       case "bottom-right":
@@ -340,6 +340,14 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
 
     return styles;
   };
+
+  // Ensure widget overlay stacks above host page UI
+  useEffect(() => {
+    document.documentElement.style.setProperty(
+      "--a11y-widget-z-index",
+      String(A11Y_WIDGET_Z_INDEX)
+    );
+  }, []);
 
   // Load settings from localStorage on mount
   useEffect(() => {
@@ -649,18 +657,11 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
     closeSettings: () => setIsOpen(false),
   }), [speak, stop, isSpeaking]);
 
-  return (
-    <>
-      {/* aria-live region for status announcements */}
-      <div 
-        role="status" 
-        aria-live="polite" 
-        aria-atomic="true"
-        className="a11y-sr-only"
-      >
-        {speechStatus}
-      </div>
+  const portalTarget =
+    typeof document !== "undefined" ? document.body : null;
 
+  const widgetOverlay = (
+    <>
       {/* Floating Button */}
       <button
         ref={triggerRef}
@@ -1135,11 +1136,49 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
                 Reset All Settings
               </button>
             </div>
+
+            <p className="a11y-widget-version" aria-label={`Version ${WIDGET_VERSION}`}>
+              v{WIDGET_VERSION}
+            </p>
           </div>
         </div>
           </div>
         </div>
       )}
+
+      {/* Floating Speech Controls - Show when TTS is enabled */}
+      {settings.textToSpeech && !showFloatingControls && (
+        <SpeechFloatingControls
+          status={status}
+          readMode={settings.speechReadMode}
+          speechRate={settings.speechRate}
+          progress={progress}
+          onSpeak={speak}
+          onPause={pause}
+          onResume={resume}
+          onStop={stop}
+          onModeChange={handleModeChange}
+          onRateChange={handleRateChange}
+          onClose={() => setShowFloatingControls(true)}
+          position={position}
+        />
+      )}
+    </>
+  );
+
+  return (
+    <>
+      {/* aria-live region for status announcements */}
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="a11y-sr-only"
+      >
+        {speechStatus}
+      </div>
+
+      {portalTarget ? createPortal(widgetOverlay, portalTarget) : widgetOverlay}
 
       {/* SVG Color Blind Filters */}
       <svg style={{ position: "absolute", width: 0, height: 0 }} aria-hidden="true">
@@ -1181,24 +1220,6 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
           </filter>
         </defs>
       </svg>
-
-      {/* Floating Speech Controls - Show when TTS is enabled */}
-      {settings.textToSpeech && !showFloatingControls && (
-        <SpeechFloatingControls
-          status={status}
-          readMode={settings.speechReadMode}
-          speechRate={settings.speechRate}
-          progress={progress}
-          onSpeak={speak}
-          onPause={pause}
-          onResume={resume}
-          onStop={stop}
-          onModeChange={handleModeChange}
-          onRateChange={handleRateChange}
-          onClose={() => setShowFloatingControls(true)}
-          position={position}
-        />
-      )}
     </>
   );
 });

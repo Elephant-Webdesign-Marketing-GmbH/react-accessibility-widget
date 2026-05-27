@@ -467,5 +467,5 @@ Found a bug or have a feature request? Please open an issue on [GitHub](https://
 
 ---
 
-**Version:** 1.3.0  
+**Version:** 1.3.1  
 **Status:** ✅ Production Ready
