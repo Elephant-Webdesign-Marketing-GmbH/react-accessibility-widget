@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, forwardRef, useImperativeHandle, useCallback } from "react";
 import {
   X,
   PersonStanding,
@@ -15,11 +15,35 @@ import {
   Palette,
 } from "lucide-react";
 import "./styles.css";
+import { FontSizeScalingMode } from "./enums/FontSizeScalingMode";
+import { SpeechReadMode } from "./enums/SpeechReadMode";
+import { applyFontSizeScaling } from "./fontSize/applyFontSizeScaling";
+import { detectFontSizeScalingMode } from "./fontSize/detectFontSizeScalingMode";
+import { mapLanguageToBCP47 } from "./speech/speechSynthesisBrowserFixes";
+import { SpeechFloatingControls } from "./speech/SpeechFloatingControls";
+import { useSpeechSynthesis } from "./speech/useSpeechSynthesis";
+import { SpeechSynthesisStatus } from "./speech/SpeechSynthesisStatus";
 
 /**
  * Widget position on screen
  */
 export type WidgetPosition = "bottom-right" | "bottom-left" | "top-right" | "top-left";
+
+/**
+ * Imperative API exposed via ref
+ */
+export interface AccessibilityWidgetRef {
+  /** Start text-to-speech with optional text */
+  speak: (text?: string) => void;
+  /** Stop text-to-speech */
+  stop: () => void;
+  /** Check if currently speaking */
+  isSpeaking: () => boolean;
+  /** Open the settings modal */
+  openSettings: () => void;
+  /** Close the settings modal */
+  closeSettings: () => void;
+}
 
 /**
  * Widget props for customization
@@ -31,6 +55,17 @@ export interface AccessibilityWidgetProps {
   offsetX?: number;
   /** Vertical offset in pixels (default: 24) */
   offsetY?: number;
+  /** Default speech language (BCP-47 tag, e.g., "de-DE"). Falls back to document lang */
+  defaultSpeechLang?: string;
+  /** CSS selector for main content to read (default: "#main-content") */
+  readContentSelector?: string;
+  /**
+   * Font size scaling strategy.
+   * - "auto" (default): detect rem vs px once and pick the best approach
+   * - FontSizeScalingMode.REM_ROOT: always scale via html font-size %
+   * - FontSizeScalingMode.PX_ZOOM: always scale via page zoom (px fallback)
+   */
+  fontSizeScaling?: FontSizeScalingMode | "auto";
 }
 
 /**
@@ -55,6 +90,25 @@ export interface AccessibilitySettings {
   // Audio
   textToSpeech: boolean;
   speechRate: number;
+  speechLang: string;
+  speechVoiceUri: string | null;
+  speechReadMode: SpeechReadMode;
+}
+
+/**
+ * Get default speech language from document or fallback
+ */
+function getDefaultSpeechLang(defaultSpeechLang?: string): string {
+  if (defaultSpeechLang) {
+    return defaultSpeechLang;
+  }
+  
+  const docLang = document.documentElement.lang;
+  if (docLang) {
+    return mapLanguageToBCP47(docLang);
+  }
+  
+  return "de-DE";
 }
 
 /**
@@ -72,6 +126,9 @@ const DEFAULT_SETTINGS: AccessibilitySettings = {
   reducedMotion: false,
   textToSpeech: false,
   speechRate: 1,
+  speechLang: "de-DE",
+  speechVoiceUri: null,
+  speechReadMode: SpeechReadMode.AUTO,
 };
 
 /**
@@ -106,18 +163,70 @@ const STORAGE_KEY = "accessibility-settings";
  *
  * All settings are saved in localStorage and restored on next visit.
  */
-export function AccessibilityWidget({
-  position = "bottom-right",
-  offsetX = 24,
-  offsetY = 24,
-}: AccessibilityWidgetProps = {}) {
+export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, AccessibilityWidgetProps>(
+  function AccessibilityWidget(
+    {
+      position = "bottom-right",
+      offsetX = 24,
+      offsetY = 24,
+      defaultSpeechLang,
+      readContentSelector = "#main-content",
+      fontSizeScaling = "auto",
+    }: AccessibilityWidgetProps = {},
+    ref
+  ) {
   const [isOpen, setIsOpen] = useState(false);
   const [settings, setSettings] = useState<AccessibilitySettings>(DEFAULT_SETTINGS);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const speechSynthRef = useRef<SpeechSynthesisUtterance | null>(null);
-  const isCancelledRef = useRef(false);
+  const [showFloatingControls, setShowFloatingControls] = useState(false);
+  const [speechStatus, setSpeechStatus] = useState<string>("");
   const triggerRef = useRef<HTMLButtonElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
+  const fontSizeScalingModeRef = useRef<FontSizeScalingMode | null>(null);
+
+  const resolveFontSizeScalingMode = useCallback((): FontSizeScalingMode => {
+    if (fontSizeScaling !== "auto") {
+      return fontSizeScaling;
+    }
+
+    if (fontSizeScalingModeRef.current === null) {
+      fontSizeScalingModeRef.current = detectFontSizeScalingMode();
+    }
+
+    return fontSizeScalingModeRef.current;
+  }, [fontSizeScaling]);
+
+  // Memoize callbacks to prevent infinite re-renders
+  const handleStatusChange = useCallback((status: SpeechSynthesisStatus) => {
+    if (status === SpeechSynthesisStatus.SPEAKING) {
+      setSpeechStatus("Vorlesen gestartet");
+    } else if (status === SpeechSynthesisStatus.PAUSED) {
+      setSpeechStatus("Pausiert");
+    } else if (status === SpeechSynthesisStatus.ERROR) {
+      setSpeechStatus("Fehler beim Vorlesen");
+    }
+  }, []);
+
+  const handleError = useCallback((error: string) => {
+    setSpeechStatus(error);
+  }, []);
+
+  const handleComplete = useCallback(() => {
+    setSpeechStatus("Vorlesen beendet");
+  }, []);
+
+  // Use the speech synthesis hook
+  const speechSynthesis = useSpeechSynthesis({
+    lang: settings.speechLang,
+    rate: settings.speechRate,
+    voiceUri: settings.speechVoiceUri,
+    contentSelector: readContentSelector,
+    onStatusChange: handleStatusChange,
+    onError: handleError,
+    onComplete: handleComplete,
+  });
+
+  // Extract stable functions for use in dependencies
+  const { speak, stop, pause, resume, cacheSelection, isSpeaking, status, progress } = speechSynthesis;
 
   // Calculate position styles for widget button
   const getPositionStyles = (): React.CSSProperties => {
@@ -238,33 +347,72 @@ export function AccessibilityWidget({
     if (stored) {
       try {
         const parsed = JSON.parse(stored) as AccessibilitySettings;
+        
+        // Ensure speechLang is set (migration for existing settings)
+        if (!parsed.speechLang) {
+          parsed.speechLang = getDefaultSpeechLang(defaultSpeechLang);
+        }
+        
+        // Ensure speechReadMode is set (migration for existing settings)
+        if (!parsed.speechReadMode) {
+          parsed.speechReadMode = SpeechReadMode.AUTO;
+        }
+        
         setSettings(parsed);
         applySettings(parsed);
       } catch (error) {
         console.error("Failed to parse accessibility settings:", error);
       }
+    } else {
+      // First-time initialization: set default speechLang based on document or prop
+      const initialSettings = {
+        ...DEFAULT_SETTINGS,
+        speechLang: getDefaultSpeechLang(defaultSpeechLang),
+      };
+      setSettings(initialSettings);
     }
-  }, []);
+  }, [defaultSpeechLang]);
 
   // Handle body scroll lock when modal is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      // Cache selection before modal potentially clears it
+      cacheSelection();
     } else {
       document.body.style.overflow = '';
     }
     return () => {
       document.body.style.overflow = '';
     };
-  }, [isOpen]);
+  }, [isOpen, cacheSelection]);
+
+  // Cleanup speech synthesis on unmount
+  useEffect(() => {
+    return () => {
+      stop();
+    };
+  }, [stop]);
 
   // Keyboard shortcut to open/close widget: Alt + A
+  // Keyboard shortcut for read-aloud: Alt + R
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Alt + A to toggle widget
       if (e.altKey && e.key.toLowerCase() === "a") {
         e.preventDefault();
         setIsOpen((prev) => !prev);
+      }
+      // Alt + R to start/stop text-to-speech (only if feature is enabled)
+      if (e.altKey && e.key.toLowerCase() === "r") {
+        e.preventDefault();
+        if (settings.textToSpeech) {
+          if (isSpeaking) {
+            stop();
+          } else {
+            speak();
+          }
+        }
       }
       // Escape to close widget
       if (e.key === "Escape" && isOpen) {
@@ -274,7 +422,7 @@ export function AccessibilityWidget({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen]);
+  }, [isOpen, settings.textToSpeech, isSpeaking, stop, speak]);
 
   /**
    * Apply accessibility settings to the document
@@ -283,8 +431,12 @@ export function AccessibilityWidget({
     const html = document.documentElement;
     const body = document.body;
 
-    // Font size
-    html.style.fontSize = `${newSettings.fontSize}%`;
+    // Font size (rem-root or px-zoom fallback)
+    applyFontSizeScaling(
+      html,
+      newSettings.fontSize,
+      resolveFontSizeScalingMode()
+    );
 
     // Font family
     html.classList.remove("a11y-font-dyslexic", "a11y-font-arial", "a11y-font-serif");
@@ -417,8 +569,16 @@ export function AccessibilityWidget({
    * Reset all settings to default
    */
   const resetSettings = () => {
-    setSettings(DEFAULT_SETTINGS);
-    applySettings(DEFAULT_SETTINGS);
+    // Stop any ongoing speech
+    stop();
+    
+    const resetDefaults = {
+      ...DEFAULT_SETTINGS,
+      speechLang: getDefaultSpeechLang(defaultSpeechLang),
+    };
+    
+    setSettings(resetDefaults);
+    applySettings(resetDefaults);
     localStorage.removeItem(STORAGE_KEY);
   };
 
@@ -455,79 +615,6 @@ export function AccessibilityWidget({
   };
 
   /**
-   * Text-to-Speech: Speak selected text or entire page
-   */
-  const speakText = (text?: string) => {
-    if (!("speechSynthesis" in window)) {
-      alert("Text-to-speech is not supported by your browser.");
-      return;
-    }
-
-    // Stop current speech if speaking
-    if (isSpeaking) {
-      isCancelledRef.current = true;
-      window.speechSynthesis.cancel();
-      setIsSpeaking(false);
-      return;
-    }
-
-    // Reset cancelled flag
-    isCancelledRef.current = false;
-
-    // Get text to speak
-    let textToSpeak = text;
-    if (!textToSpeak) {
-      const selection = window.getSelection();
-      textToSpeak = selection?.toString() || "";
-
-      // If no selection, speak the main content
-      if (!textToSpeak) {
-        const mainContent = document.getElementById("main-content");
-        textToSpeak = mainContent?.innerText || document.body.innerText;
-      }
-    }
-
-    if (!textToSpeak) {
-      alert("No text found to read. Please select some text.");
-      return;
-    }
-
-    const utterance = new SpeechSynthesisUtterance(textToSpeak);
-    utterance.lang = "en-US";
-    utterance.rate = settings.speechRate;
-
-    utterance.onend = () => {
-      setIsSpeaking(false);
-      isCancelledRef.current = false;
-    };
-
-    utterance.onerror = (event) => {
-      setIsSpeaking(false);
-      // Only show error if it wasn't a manual cancellation
-      if (!isCancelledRef.current) {
-        console.error("Speech synthesis error:", event);
-        alert("Error reading text.");
-      }
-      isCancelledRef.current = false;
-    };
-
-    speechSynthRef.current = utterance;
-    window.speechSynthesis.speak(utterance);
-    setIsSpeaking(true);
-  };
-
-  /**
-   * Stop text-to-speech
-   */
-  const stopSpeaking = () => {
-    if ("speechSynthesis" in window) {
-      isCancelledRef.current = true;
-      window.speechSynthesis.cancel();
-      setIsSpeaking(false);
-    }
-  };
-
-  /**
    * Toggle text-to-speech feature
    */
   const toggleTextToSpeech = () => {
@@ -535,12 +622,45 @@ export function AccessibilityWidget({
     updateSettings({ textToSpeech: newValue });
 
     if (!newValue && isSpeaking) {
-      stopSpeaking();
+      stop();
     }
   };
 
+  /**
+   * Handle mode change in floating controls
+   */
+  const handleModeChange = (mode: SpeechReadMode) => {
+    updateSettings({ speechReadMode: mode });
+  };
+
+  /**
+   * Handle rate change in floating controls
+   */
+  const handleRateChange = (rate: number) => {
+    updateSettings({ speechRate: rate });
+  };
+
+  // Expose imperative API via ref
+  useImperativeHandle(ref, () => ({
+    speak,
+    stop,
+    isSpeaking: () => isSpeaking,
+    openSettings: () => setIsOpen(true),
+    closeSettings: () => setIsOpen(false),
+  }), [speak, stop, isSpeaking]);
+
   return (
     <>
+      {/* aria-live region for status announcements */}
+      <div 
+        role="status" 
+        aria-live="polite" 
+        aria-atomic="true"
+        className="a11y-sr-only"
+      >
+        {speechStatus}
+      </div>
+
       {/* Floating Button */}
       <button
         ref={triggerRef}
@@ -550,6 +670,7 @@ export function AccessibilityWidget({
         onClick={() => setIsOpen(true)}
         aria-label="Open Accessibility Settings (Alt + A)"
         title="Open Accessibility Settings (Alt + A)"
+        data-a11y-widget
       >
         <PersonStanding className="a11y-widget-trigger-icon" aria-hidden="true" />
       </button>
@@ -564,6 +685,7 @@ export function AccessibilityWidget({
               setIsOpen(false);
             }
           }}
+          data-a11y-widget
         >
           <div
             ref={modalRef}
@@ -572,6 +694,7 @@ export function AccessibilityWidget({
             role="dialog"
             aria-modal="true"
             aria-labelledby="a11y-widget-title"
+            data-a11y-widget
           >
         <div className="a11y-widget-content">
           {/* Header */}
@@ -978,7 +1101,7 @@ export function AccessibilityWidget({
                     <button
                       type="button"
                       className={`a11y-btn a11y-btn-full ${isSpeaking ? "a11y-btn-destructive" : "a11y-btn-active"}`}
-                      onClick={() => (isSpeaking ? stopSpeaking() : speakText())}
+                      onClick={() => (isSpeaking ? stop() : speak())}
                     >
                       {isSpeaking ? (
                         <>
@@ -993,7 +1116,7 @@ export function AccessibilityWidget({
                       )}
                     </button>
                     <p className="a11y-widget-hint">
-                      Select text or let the entire page be read aloud
+                      Select text or let the entire page be read aloud. Controls appear when reading starts.
                     </p>
                   </div>
                 </>
@@ -1058,6 +1181,24 @@ export function AccessibilityWidget({
           </filter>
         </defs>
       </svg>
+
+      {/* Floating Speech Controls - Show when TTS is enabled */}
+      {settings.textToSpeech && !showFloatingControls && (
+        <SpeechFloatingControls
+          status={status}
+          readMode={settings.speechReadMode}
+          speechRate={settings.speechRate}
+          progress={progress}
+          onSpeak={speak}
+          onPause={pause}
+          onResume={resume}
+          onStop={stop}
+          onModeChange={handleModeChange}
+          onRateChange={handleRateChange}
+          onClose={() => setShowFloatingControls(true)}
+          position={position}
+        />
+      )}
     </>
   );
-}
+});

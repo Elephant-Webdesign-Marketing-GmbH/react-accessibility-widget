@@ -3,6 +3,21 @@
 /* OpenDyslexic Font */
 @import url("https://fonts.googleapis.com/css2?family=OpenDyslexic:wght@400;700&display=swap");
 
+/* =============== ACCESSIBILITY UTILITIES =============== */
+
+/* Screen reader only - visually hidden but accessible */
+.a11y-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
 /* =============== ACCESSIBILITY WIDGET STYLES =============== */
 
 /* Floating Trigger Button */
@@ -277,6 +292,18 @@
   margin: 1.5rem 0;
 }
 
+/* =============== FONT SIZE =============== */
+
+/* Fallback when host page uses fixed px font sizes (rem-root scaling has no effect) */
+html.a11y-font-px-zoom {
+  zoom: var(--a11y-page-zoom, 1);
+}
+
+/* Keep widget UI at intended size while page zoom is active */
+html.a11y-font-px-zoom [data-a11y-widget] {
+  zoom: calc(1 / var(--a11y-page-zoom, 1));
+}
+
 /* =============== FONT FAMILIES =============== */
 
 html.a11y-font-dyslexic,
@@ -483,4 +510,360 @@ html.a11y-reduce-motion [class*="motion-"] {
 ::-moz-selection {
   background-color: #2563eb !important;
   color: #fff !important;
+}
+
+/* =============== SPEECH FLOATING CONTROLS =============== */
+
+.a11y-speech-floating-bar {
+  position: fixed;
+  z-index: 9998;
+  background: white;
+  border-radius: 24px;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid #e5e7eb;
+  min-width: 280px;
+  transition: all 0.2s ease;
+}
+
+.a11y-speech-floating-bottom-right {
+  right: 24px;
+  bottom: 100px;
+}
+
+.a11y-speech-floating-bottom-left {
+  left: 24px;
+  bottom: 100px;
+}
+
+.a11y-speech-floating-top-right {
+  right: 24px;
+  top: 100px;
+}
+
+.a11y-speech-floating-top-left {
+  left: 24px;
+  top: 100px;
+}
+
+.a11y-speech-control-btn {
+  background: #f3f4f6;
+  border: none;
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #374151;
+}
+
+.a11y-speech-control-btn:hover {
+  background: #e5e7eb;
+}
+
+.a11y-speech-control-btn:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.a11y-speech-control-stop {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.a11y-speech-control-stop:hover {
+  background: #fee2e2;
+}
+
+.a11y-speech-control-close {
+  margin-left: auto;
+}
+
+.a11y-speech-control-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.a11y-speech-mode-toggle {
+  display: flex;
+  gap: 0;
+  background: #f3f4f6;
+  border-radius: 8px;
+  padding: 2px;
+}
+
+.a11y-speech-mode-btn {
+  background: transparent;
+  border: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #6b7280;
+}
+
+.a11y-speech-mode-btn.active {
+  background: white;
+  color: #2563eb;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.a11y-speech-mode-btn:hover:not(.active) {
+  color: #374151;
+}
+
+.a11y-speech-mode-btn:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.a11y-speech-progress {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Speed Control */
+.a11y-speech-speed-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-left: 0.5rem;
+  border-left: 1px solid #e5e7eb;
+}
+
+.a11y-speech-speed-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  min-width: 2.5rem;
+  text-align: center;
+}
+
+.a11y-speech-speed-slider {
+  width: 80px;
+  height: 6px;
+  border-radius: 3px;
+  background: #e5e7eb;
+  outline: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.a11y-speech-speed-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #2563eb;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.a11y-speech-speed-slider::-webkit-slider-thumb:hover {
+  background: #1d4ed8;
+  transform: scale(1.1);
+}
+
+.a11y-speech-speed-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: 50%;
+  background: #2563eb;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.a11y-speech-speed-slider::-moz-range-thumb:hover {
+  background: #1d4ed8;
+  transform: scale(1.1);
+}
+
+.a11y-speech-speed-slider:focus {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* Contrast mode adjustments for floating controls */
+.a11y-contrast-high .a11y-speech-floating-bar {
+  background: white;
+  border-color: black;
+  color: black;
+}
+
+.a11y-contrast-high .a11y-speech-control-btn {
+  background: white;
+  border: 2px solid black;
+  color: black;
+}
+
+.a11y-contrast-high .a11y-speech-control-stop {
+  background: white;
+  color: #dc2626;
+}
+
+.a11y-contrast-high .a11y-speech-speed-control {
+  border-left-color: black;
+}
+
+.a11y-contrast-high .a11y-speech-speed-label {
+  color: black;
+}
+
+.a11y-contrast-high .a11y-speech-speed-slider {
+  background: #e5e7eb;
+}
+
+.a11y-contrast-high .a11y-speech-speed-slider::-webkit-slider-thumb {
+  background: black;
+}
+
+.a11y-contrast-high .a11y-speech-speed-slider::-moz-range-thumb {
+  background: black;
+}
+
+.a11y-contrast-dark .a11y-speech-floating-bar {
+  background: #1f2937;
+  border-color: #374151;
+  color: white;
+}
+
+.a11y-contrast-dark .a11y-speech-control-btn {
+  background: #374151;
+  color: white;
+}
+
+.a11y-contrast-dark .a11y-speech-mode-toggle {
+  background: #374151;
+}
+
+.a11y-contrast-dark .a11y-speech-mode-btn {
+  color: #9ca3af;
+}
+
+.a11y-contrast-dark .a11y-speech-mode-btn.active {
+  background: #4b5563;
+  color: #60a5fa;
+}
+
+.a11y-contrast-dark .a11y-speech-progress {
+  color: #9ca3af;
+}
+
+.a11y-contrast-dark .a11y-speech-speed-control {
+  border-left-color: #4b5563;
+}
+
+.a11y-contrast-dark .a11y-speech-speed-label {
+  color: #e5e7eb;
+}
+
+.a11y-contrast-dark .a11y-speech-speed-slider {
+  background: #4b5563;
+}
+
+.a11y-contrast-dark .a11y-speech-speed-slider::-webkit-slider-thumb {
+  background: #60a5fa;
+}
+
+.a11y-contrast-dark .a11y-speech-speed-slider::-moz-range-thumb {
+  background: #60a5fa;
+}
+
+.a11y-contrast-yellow-black .a11y-speech-floating-bar {
+  background: black;
+  border-color: yellow;
+  color: yellow;
+}
+
+.a11y-contrast-yellow-black .a11y-speech-control-btn {
+  background: black;
+  border: 2px solid yellow;
+  color: yellow;
+}
+
+.a11y-contrast-yellow-black .a11y-speech-mode-toggle {
+  background: #1a1a00;
+}
+
+.a11y-contrast-yellow-black .a11y-speech-mode-btn {
+  color: #cccc00;
+}
+
+.a11y-contrast-yellow-black .a11y-speech-mode-btn.active {
+  background: #333300;
+  color: yellow;
+}
+
+.a11y-contrast-yellow-black .a11y-speech-speed-control {
+  border-left-color: yellow;
+}
+
+.a11y-contrast-yellow-black .a11y-speech-speed-label {
+  color: yellow;
+}
+
+.a11y-contrast-yellow-black .a11y-speech-speed-slider {
+  background: #333300;
+}
+
+.a11y-contrast-yellow-black .a11y-speech-speed-slider::-webkit-slider-thumb {
+  background: yellow;
+}
+
+.a11y-contrast-yellow-black .a11y-speech-speed-slider::-moz-range-thumb {
+  background: yellow;
+}
+
+/* Reduced motion adjustments */
+.a11y-reduced-motion .a11y-speech-floating-bar,
+.a11y-reduced-motion .a11y-speech-control-btn,
+.a11y-reduced-motion .a11y-speech-mode-btn {
+  transition: none;
+}
+
+/* Speech highlight marker */
+.a11y-speech-highlight {
+  background-color: #fef08a;
+  color: inherit;
+  padding: 2px 0;
+  border-radius: 2px;
+  animation: a11y-pulse 1s ease-in-out;
+}
+
+.a11y-contrast-dark .a11y-speech-highlight {
+  background-color: #854d0e;
+  color: #fef08a;
+}
+
+.a11y-contrast-high .a11y-speech-highlight {
+  background-color: #ffff00;
+  color: #000;
+  outline: 2px solid #000;
+}
+
+.a11y-contrast-yellow-black .a11y-speech-highlight {
+  background-color: #ffff00;
+  color: #000;
+}
+
+@keyframes a11y-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.a11y-reduced-motion .a11y-speech-highlight {
+  animation: none;
 }

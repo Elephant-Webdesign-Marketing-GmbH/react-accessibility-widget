@@ -9,7 +9,7 @@ A comprehensive, production-ready **accessibility widget** for React application
 ## 🎯 Features
 
 ### 📝 Text & Font
-- **Font Size Adjustment** (80-150%)
+- **Font Size Adjustment** (80-150%, rem standard with automatic px fallback)
 - **Dyslexia-Friendly Fonts** (OpenDyslexic)
 - **Line Height** (Normal, Relaxed, Loose)
 - **Letter Spacing** (Normal, Wide, Very Wide)
@@ -26,7 +26,13 @@ A comprehensive, production-ready **accessibility widget** for React application
 
 ### 🔊 Audio
 - **Text-to-Speech** (Read selected text or entire page)
+- **Automatic Language Detection** (Supports de-DE, en-US, and more)
+- **Voice Selection** (Choose from available system voices)
 - **Speech Rate Control** (0.5x - 2.0x)
+- **Long Text Support** (Automatic chunking for texts of any length)
+- **Pause & Resume** (Control playback with floating controls)
+- **Reading Modes** (Auto or with word highlighting)
+- **Floating Controls** (Control bar with pause, stop, and mode switching)
 
 All settings are **automatically saved** to localStorage and restored on the next visit.
 
@@ -74,14 +80,38 @@ export default function App() {
 }
 ```
 
-### With Custom Position
+### With Custom Position and TTS Options
 
 ```tsx
 <AccessibilityWidget 
-  position="bottom-right"  // "bottom-right" | "bottom-left" | "top-right" | "top-left"
-  offsetX={24}            // Horizontal offset in pixels (default: 24)
-  offsetY={24}            // Vertical offset in pixels (default: 24)
+  position="bottom-right"         // Widget position
+  offsetX={24}                    // Horizontal offset in pixels
+  offsetY={24}                    // Vertical offset in pixels
+  defaultSpeechLang="de-DE"      // Default TTS language (BCP-47)
+  readContentSelector="#main-content"  // CSS selector for TTS content
 />
+```
+
+### With Imperative API
+
+```tsx
+import { useRef } from 'react';
+import { AccessibilityWidget, AccessibilityWidgetRef } from '@elephant-webdesign-marketing-gmbh/react-accessibility-widget';
+
+function App() {
+  const widgetRef = useRef<AccessibilityWidgetRef>(null);
+
+  const handleReadAloud = () => {
+    widgetRef.current?.speak("Dies ist ein benutzerdefinierter Text zum Vorlesen.");
+  };
+
+  return (
+    <>
+      <button onClick={handleReadAloud}>Text vorlesen</button>
+      <AccessibilityWidget ref={widgetRef} />
+    </>
+  );
+}
 ```
 
 ### Examples
@@ -136,6 +166,7 @@ function App() {
 ## ⌨️ Keyboard Shortcuts
 
 - **Alt + A** - Toggle accessibility widget
+- **Alt + R** - Start/stop text-to-speech (when enabled)
 - **Escape** - Close widget
 - **Tab** - Navigate through controls
 
@@ -206,6 +237,16 @@ This widget helps your application meet 16+ WCAG criteria:
 - ✅ Safari 14+
 - ✅ Mobile browsers (iOS Safari, Chrome Mobile)
 
+### Chrome: Text-to-Speech Activation
+
+**Wichtig für Chrome-Nutzer:** Die Text-to-Speech-Funktion benötigt experimentelle Web Platform Features:
+
+1. Öffne in Chrome: `chrome://flags/#enable-experimental-web-platform-features`
+2. Stelle auf **"Enabled"**
+3. **Chrome neu starten**
+
+Ohne diese Einstellung funktioniert die Sprachausgabe in Chrome nicht. Safari und Firefox benötigen diese Anpassung nicht.
+
 **Note:** Text-to-Speech availability varies by browser and language support.
 
 ## 🎯 Target Audiences
@@ -229,12 +270,40 @@ interface AccessibilityWidgetProps {
   offsetX?: number;
   /** Vertical offset in pixels (default: 24) */
   offsetY?: number;
+  /** Default speech language (BCP-47 tag, e.g., "de-DE"). Falls back to document lang */
+  defaultSpeechLang?: string;
+  /** CSS selector for main content to read (default: "#main-content") */
+  readContentSelector?: string;
+  /**
+   * Font size scaling strategy (default: "auto")
+   * - "auto": detect rem vs. px once and choose the best approach
+   * - FontSizeScalingMode.REM_ROOT: scale via html font-size % (rem/em)
+   * - FontSizeScalingMode.PX_ZOOM: scale via page zoom (px fallback)
+   */
+  fontSizeScaling?: FontSizeScalingMode | "auto";
 }
 ```
 
 **Position Behavior:**
 - **Desktop:** Dialog appears next to the widget button
 - **Mobile (< 768px):** Dialog is always centered on screen
+
+### AccessibilityWidgetRef (Imperative API)
+
+```typescript
+interface AccessibilityWidgetRef {
+  /** Start text-to-speech with optional text */
+  speak: (text?: string) => void;
+  /** Stop text-to-speech */
+  stop: () => void;
+  /** Check if currently speaking */
+  isSpeaking: () => boolean;
+  /** Open the settings modal */
+  openSettings: () => void;
+  /** Close the settings modal */
+  closeSettings: () => void;
+}
+```
 
 ### AccessibilitySettings Interface
 
@@ -258,6 +327,101 @@ interface AccessibilitySettings {
   // Audio
   textToSpeech: boolean;
   speechRate: number;                        // 0.5-2.0
+  speechLang: string;                        // BCP-47 language tag
+  speechVoiceUri: string | null;             // Voice URI or null for default
+  speechReadMode: SpeechReadMode;            // AUTO or HIGHLIGHT
+}
+```
+
+### Enums
+
+```typescript
+enum SpeechReadMode {
+  AUTO = "auto",              // Automatic continuous reading
+  HIGHLIGHT = "highlight",    // Reading with word highlighting
+}
+
+enum WidgetLocale {
+  DE = "de",
+  EN = "en",
+}
+
+enum FontSizeScalingMode {
+  REM_ROOT = "rem-root",
+  PX_ZOOM = "px-zoom",
+}
+```
+
+## 🌍 Text-to-Speech Language Support
+
+The TTS feature automatically detects the document language and selects an appropriate voice. Supported languages include:
+
+- **German (de-DE)** - Default for German pages
+- **English (en-US)** - Default for English pages
+- **French (fr-FR)**, **Spanish (es-ES)**, **Italian (it-IT)**, and more
+
+You can override the language by setting the `defaultSpeechLang` prop:
+
+```tsx
+<AccessibilityWidget defaultSpeechLang="de-DE" />
+```
+
+### Browser Compatibility
+
+- **Desktop browsers**: Full support for pause/resume and voice selection
+- **Safari/iOS**: Limited pause/resume support (automatic fallback to stop/restart)
+- **Voice availability**: Varies by browser and operating system
+
+## 📄 Best Practices
+
+1. **Add `id="main-content"` to your main content area** for better TTS targeting:
+   ```tsx
+   <main id="main-content">
+     {/* Your content */}
+   </main>
+   ```
+
+2. **Use semantic HTML** for better text extraction and screen reader support
+
+3. **Test with keyboard navigation** (Tab, Enter, Escape)
+
+4. **Provide clear focus indicators** for interactive elements
+
+## ⚙️ Configuration Examples
+
+### E-commerce Site
+
+```tsx
+<AccessibilityWidget
+  position="bottom-left"
+  defaultSpeechLang="de-DE"
+  readContentSelector=".product-content"
+/>
+```
+
+### Blog/Content Site
+
+```tsx
+<AccessibilityWidget
+  position="top-right"
+  offsetX={16}
+  defaultSpeechLang="en-US"
+  readContentSelector="article"
+/>
+```
+
+### Multi-language Site
+
+```tsx
+function App() {
+  const lang = document.documentElement.lang;
+  
+  return (
+    <AccessibilityWidget
+      defaultSpeechLang={lang === 'de' ? 'de-DE' : 'en-US'}
+      readContentSelector="#main-content"
+    />
+  );
 }
 ```
 
@@ -280,6 +444,7 @@ The widget applies these classes to `<html>` element:
 - `.a11y-colorblind-tritanopia` - Blue-blind filter
 - `.a11y-focus-mode` - Enhanced focus indicators
 - `.a11y-reduce-motion` - Reduced motion
+- `.a11y-font-px-zoom` - Page zoom fallback for px-based font sizes
 
 ## 📝 License
 
@@ -302,5 +467,5 @@ Found a bug or have a feature request? Please open an issue on [GitHub](https://
 
 ---
 
-**Version:** 1.0.0  
+**Version:** 1.3.0  
 **Status:** ✅ Production Ready
