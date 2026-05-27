@@ -1,6 +1,11 @@
 export { AccessibilityWidget } from './AccessibilityWidget';
 export type { AccessibilitySettings, AccessibilityWidgetProps, AccessibilityWidgetRef, WidgetPosition } from './AccessibilityWidget';
+export { WIDGET_VERSION } from './constants/WidgetVersion';
+export { A11Y_SETTINGS_CHANGE_EVENT_NAME } from './constants/A11ySettingsChangeEventName';
+export { ForceDefaultCursorMode } from './enums/ForceDefaultCursorMode';
 export { FontSizeScalingMode } from './enums/FontSizeScalingMode';
 export { SpeechReadMode } from './enums/SpeechReadMode';
 export { WidgetLocale } from './enums/WidgetLocale';
+export type { A11ySettingsChangeDetail } from './types/A11ySettingsChangeDetail';
+export { isVisualSettingsActive } from './utils/isVisualSettingsActive';
 export type { I18nStrings } from './speech/i18n';

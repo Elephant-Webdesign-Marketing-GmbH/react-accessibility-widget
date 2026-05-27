@@ -17,11 +17,15 @@ import {
 } from "lucide-react";
 import "./styles.css";
 import { FontSizeScalingMode } from "./enums/FontSizeScalingMode";
+import { ForceDefaultCursorMode } from "./enums/ForceDefaultCursorMode";
 import { SpeechReadMode } from "./enums/SpeechReadMode";
 import { A11Y_WIDGET_Z_INDEX } from "./constants/A11yZIndex";
 import { WIDGET_VERSION } from "./constants/WidgetVersion";
+import { dispatchA11ySettingsChange } from "./events/dispatchA11ySettingsChange";
 import { applyFontSizeScaling } from "./fontSize/applyFontSizeScaling";
 import { detectFontSizeScalingMode } from "./fontSize/detectFontSizeScalingMode";
+import { isVisualSettingsActive } from "./utils/isVisualSettingsActive";
+import { resolveForceDefaultCursor } from "./utils/resolveForceDefaultCursor";
 import { mapLanguageToBCP47 } from "./speech/speechSynthesisBrowserFixes";
 import { SpeechFloatingControls } from "./speech/SpeechFloatingControls";
 import { useSpeechSynthesis } from "./speech/useSpeechSynthesis";
@@ -69,6 +73,15 @@ export interface AccessibilityWidgetProps {
    * - FontSizeScalingMode.PX_ZOOM: always scale via page zoom (px fallback)
    */
   fontSizeScaling?: FontSizeScalingMode | "auto";
+  /**
+   * Override custom page cursors with system defaults.
+   * - ForceDefaultCursorMode.WHEN_ACTIVE: only while visual settings differ from defaults
+   * - ForceDefaultCursorMode.ALWAYS: always while the widget is mounted
+   * - false: do not override (default)
+   *
+   * Dispatches `a11y-settings-change` so host pages can hide JS-based custom cursors.
+   */
+  forceDefaultCursor?: ForceDefaultCursorMode | false;
 }
 
 /**
@@ -175,6 +188,7 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
       defaultSpeechLang,
       readContentSelector = "#main-content",
       fontSizeScaling = "auto",
+      forceDefaultCursor = false,
     }: AccessibilityWidgetProps = {},
     ref
   ) {
@@ -378,8 +392,14 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
         speechLang: getDefaultSpeechLang(defaultSpeechLang),
       };
       setSettings(initialSettings);
+      applySettings(initialSettings);
     }
   }, [defaultSpeechLang]);
+
+  // Re-apply cursor override when forceDefaultCursor prop changes
+  useEffect(() => {
+    applySettings(settings);
+  }, [forceDefaultCursor]);
 
   // Handle body scroll lock when modal is open
   useEffect(() => {
@@ -548,6 +568,23 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
         styleElement.remove();
       }
     }
+
+    const forceDefaultCursorActive = resolveForceDefaultCursor(
+      forceDefaultCursor,
+      newSettings
+    );
+
+    if (forceDefaultCursorActive) {
+      html.classList.add("a11y-force-default-cursor");
+    } else {
+      html.classList.remove("a11y-force-default-cursor");
+    }
+
+    dispatchA11ySettingsChange({
+      settings: newSettings,
+      isActive: isVisualSettingsActive(newSettings),
+      forceDefaultCursor: forceDefaultCursorActive,
+    });
   };
 
   /**

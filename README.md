@@ -203,6 +203,18 @@ Add the class `a11y-preserve-transform` to elements you don't want to scale:
 </button>
 ```
 
+### Custom page cursors
+
+If your site uses a custom cursor (CSS `cursor: url(...)` or a JS element following the mouse), enable:
+
+```tsx
+import { AccessibilityWidget, ForceDefaultCursorMode } from '@elephant-webdesign-marketing-gmbh/react-accessibility-widget';
+
+<AccessibilityWidget forceDefaultCursor={ForceDefaultCursorMode.WHEN_ACTIVE} />
+```
+
+For JS-based cursors, listen for `a11y-settings-change` and hide your cursor element when `detail.forceDefaultCursor` is `true`.
+
 ## 📊 WCAG 2.1 Compliance
 
 This widget helps your application meet 16+ WCAG criteria:
@@ -281,6 +293,12 @@ interface AccessibilityWidgetProps {
    * - FontSizeScalingMode.PX_ZOOM: scale via page zoom (px fallback)
    */
   fontSizeScaling?: FontSizeScalingMode | "auto";
+  /**
+   * Override custom page cursors with system defaults (default: false)
+   * - ForceDefaultCursorMode.WHEN_ACTIVE: only while visual settings differ from defaults
+   * - ForceDefaultCursorMode.ALWAYS: always while the widget is mounted
+   */
+  forceDefaultCursor?: ForceDefaultCursorMode | false;
 }
 ```
 
@@ -467,5 +485,5 @@ Found a bug or have a feature request? Please open an issue on [GitHub](https://
 
 ---
 
-**Version:** 1.3.1  
+**Version:** 1.4.0  
 **Status:** ✅ Production Ready

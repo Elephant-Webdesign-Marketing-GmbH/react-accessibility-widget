@@ -312,6 +312,47 @@
   margin: 1.5rem 0;
 }
 
+/* =============== DEFAULT CURSOR OVERRIDE =============== */
+
+/*
+ * Restores system cursors when custom page cursors conflict with zoom/scale.
+ * Host pages with JS-based cursors should listen for `a11y-settings-change`.
+ */
+html.a11y-force-default-cursor,
+html.a11y-force-default-cursor * {
+  cursor: auto !important;
+}
+
+html.a11y-force-default-cursor a[href],
+html.a11y-force-default-cursor button:not(:disabled),
+html.a11y-force-default-cursor [role="button"]:not([aria-disabled="true"]),
+html.a11y-force-default-cursor label[for],
+html.a11y-force-default-cursor select,
+html.a11y-force-default-cursor summary,
+html.a11y-force-default-cursor input[type="submit"],
+html.a11y-force-default-cursor input[type="button"],
+html.a11y-force-default-cursor input[type="reset"],
+html.a11y-force-default-cursor input[type="checkbox"],
+html.a11y-force-default-cursor input[type="radio"] {
+  cursor: pointer !important;
+}
+
+html.a11y-force-default-cursor input[type="text"],
+html.a11y-force-default-cursor input[type="email"],
+html.a11y-force-default-cursor input[type="password"],
+html.a11y-force-default-cursor input[type="search"],
+html.a11y-force-default-cursor input[type="url"],
+html.a11y-force-default-cursor input[type="tel"],
+html.a11y-force-default-cursor input[type="number"],
+html.a11y-force-default-cursor textarea {
+  cursor: text !important;
+}
+
+html.a11y-force-default-cursor button:disabled,
+html.a11y-force-default-cursor [aria-disabled="true"] {
+  cursor: not-allowed !important;
+}
+
 /* =============== FONT SIZE =============== */
 
 /* Fallback when host page uses fixed px font sizes (rem-root scaling has no effect) */
