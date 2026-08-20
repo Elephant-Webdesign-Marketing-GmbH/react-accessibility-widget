@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple TTS Test in React App</title>
+</head>
+<body>
+    <h1>Einfacher Test in React App Kontext</h1>
+    <button onclick="testSpeech()">Test Speech (Einfach)</button>
+    <div id="status"></div>
+
+    <script>
+        function testSpeech() {
+            const statusEl = document.getElementById('status');
+            statusEl.innerHTML = 'Starting...';
+            
+            // Warm up Chrome
+            const warmup = new SpeechSynthesisUtterance(' ');
+            warmup.volume = 0;
+            warmup.rate = 10;
+            window.speechSynthesis.speak(warmup);
+            
+            // Wait a bit, then speak
+            setTimeout(() => {
+                const utterance = new SpeechSynthesisUtterance('Hallo, das ist ein Test');
+                utterance.lang = 'de-DE';
+                
+                const voices = window.speechSynthesis.getVoices();
+                const deVoice = voices.find(v => v.lang.startsWith('de') && !v.localService);
+                if (deVoice) {
+                    utterance.voice = deVoice;
+                    statusEl.innerHTML = 'Using voice: ' + deVoice.name;
+                }
+                
+                utterance.onstart = () => {
+                    statusEl.innerHTML += '<br>✅ Started!';
+                };
+                
+                utterance.onend = () => {
+                    statusEl.innerHTML += '<br>✅ Ended!';
+                };
+                
+                utterance.onerror = (e) => {
+                    statusEl.innerHTML += '<br>❌ Error: ' + e.error;
+                };
+                
+                window.speechSynthesis.speak(utterance);
+            }, 150);
+        }
+    </script>
+</body>
+</html>

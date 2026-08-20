@@ -1,35 +1,72 @@
-name: Publish to GitHub Packages
+name: Publish package
 
 on:
   release:
-    types: [created]
+    types:
+      - published
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Dry run only (no upload)
+        type: boolean
+        default: false
+      tag:
+        description: npm dist-tag (use "test" for registry smoke tests)
+        type: string
+        default: latest
+
+permissions:
+  contents: read
 
 jobs:
-  build-and-publish:
+  publish:
+    name: Build and publish
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    
+
+    env:
+      REGISTRY_URL: https://npm.elephant-agency.de
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
-      
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@elephant-webdesign-marketing-gmbh'
-      
+          node-version: 24
+          cache: pnpm
+          registry-url: https://npm.elephant-agency.de
+
+      - name: Configure npm registry auth
+        run: |
+          echo "@elephant:registry=${REGISTRY_URL}" >> .npmrc
+          echo "//npm.elephant-agency.de/:_authToken=${NPM_TOKEN}" >> .npmrc
+
       - name: Install dependencies
-        run: npm ci
-      
-      - name: Build package
-        run: npm run build
-      
-      - name: Publish to GitHub Packages
-        run: npm publish
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Verify registry auth
+        run: |
+          WHOAMI="$(curl -sf -H "Authorization: Bearer ${NPM_TOKEN}" "${REGISTRY_URL}/-/whoami")"
+          echo "$WHOAMI"
+          echo "$WHOAMI" | grep -q '"username"'
+
+      - name: Publish to Verdaccio
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EVENT_NAME: ${{ github.event_name }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+          PUBLISH_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || 'latest' }}
+        run: |
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ "$DRY_RUN" = "true" ]; then
+            echo "Dry run — no upload"
+            pnpm publish --dry-run --no-git-checks
+          else
+            pnpm publish --tag "$PUBLISH_TAG" --no-git-checks
+          fi

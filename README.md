@@ -1,6 +1,6 @@
 # Accessibility Widget
 
-[![GitHub Package](https://img.shields.io/badge/GitHub-Package-blue)](https://github.com/Elephant-Webdesign-Marketing-GmbH/react-accessibility-widget)
+[![npm package](https://img.shields.io/badge/npm-@elephant%2Freact--accessibility--widget-blue)](https://npm.elephant-agency.de)
 [![WCAG 2.1 AAA](https://img.shields.io/badge/WCAG%202.1-AAA-green)](https://www.w3.org/WAI/WCAG21/quickref/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -38,35 +38,30 @@ All settings are **automatically saved** to localStorage and restored on the nex
 
 ## 📦 Installation
 
-### From GitHub Packages
+### From Verdaccio
 
 1. Create or edit `.npmrc` in your project root:
 
 ```
-@elephant-webdesign-marketing-gmbh:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN
+@elephant:registry=https://npm.elephant-agency.de
+//npm.elephant-agency.de/:_authToken=YOUR_NPM_TOKEN
 ```
 
 2. Install the package:
 
 ```bash
-npm install @elephant-webdesign-marketing-gmbh/react-accessibility-widget
+pnpm add @elephant/react-accessibility-widget
 ```
 
-### Creating a GitHub Token
-
-1. Go to [GitHub Settings > Tokens](https://github.com/settings/tokens)
-2. Click **"Generate new token (classic)"**
-3. Select scopes: `read:packages`
-4. Copy the token and add it to your `.npmrc`
+See `.npmrc.example` in this repository for a template.
 
 ## 🚀 Usage
 
 ### Basic Setup
 
 ```tsx
-import { AccessibilityWidget } from '@elephant-webdesign-marketing-gmbh/react-accessibility-widget';
-import '@elephant-webdesign-marketing-gmbh/react-accessibility-widget/styles.css';
+import { AccessibilityWidget } from '@elephant/react-accessibility-widget';
+import '@elephant/react-accessibility-widget/styles.css';
 
 export default function App() {
   return (
@@ -96,7 +91,7 @@ export default function App() {
 
 ```tsx
 import { useRef } from 'react';
-import { AccessibilityWidget, AccessibilityWidgetRef } from '@elephant-webdesign-marketing-gmbh/react-accessibility-widget';
+import { AccessibilityWidget, AccessibilityWidgetRef } from '@elephant/react-accessibility-widget';
 
 function App() {
   const widgetRef = useRef<AccessibilityWidgetRef>(null);
@@ -208,7 +203,7 @@ Add the class `a11y-preserve-transform` to elements you don't want to scale:
 If your site uses a custom cursor (CSS `cursor: url(...)` or a JS element following the mouse), enable:
 
 ```tsx
-import { AccessibilityWidget, ForceDefaultCursorMode } from '@elephant-webdesign-marketing-gmbh/react-accessibility-widget';
+import { AccessibilityWidget, ForceDefaultCursorMode } from '@elephant/react-accessibility-widget';
 
 <AccessibilityWidget forceDefaultCursor={ForceDefaultCursorMode.WHEN_ACTIVE} />
 ```

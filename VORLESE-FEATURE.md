@@ -77,8 +77,8 @@ Das Widget ist **production-ready** und kann deployed werden:
 ## 🎯 Verwendung
 
 ```tsx
-import { AccessibilityWidget } from '@elephant-webdesign-marketing-gmbh/react-accessibility-widget';
-import '@elephant-webdesign-marketing-gmbh/react-accessibility-widget/styles.css';
+import { AccessibilityWidget } from '@elephant/react-accessibility-widget';
+import '@elephant/react-accessibility-widget/styles.css';
 
 function App() {
   return (

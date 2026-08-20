@@ -1,5 +1,5 @@
 {
-  "name": "@elephant-webdesign-marketing-gmbh/react-accessibility-widget",
+  "name": "@elephant/react-accessibility-widget",
   "version": "1.4.0",
   "description": "Comprehensive accessibility widget with 16+ features for React applications - WCAG 2.1 AAA compliant",
   "main": "./dist/index.js",
@@ -11,7 +11,7 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
     },
-    "./styles.css": "./dist/accessibility-widget.css"
+    "./styles.css": "./dist/react-accessibility-widget.css"
   },
   "files": [
     "dist",
@@ -43,8 +43,12 @@
     "url": "https://github.com/Elephant-Webdesign-Marketing-GmbH/react-accessibility-widget.git"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com",
-    "access": "public"
+    "registry": "https://npm.elephant-agency.de"
+  },
+  "packageManager": "pnpm@10.14.0",
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=10"
   },
   "peerDependencies": {
     "react": ">=18.0.0",

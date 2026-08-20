@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **Paketname:** `@elephant-webdesign-marketing-gmbh/react-accessibility-widget` → `@elephant/react-accessibility-widget`
+- **Registry:** Veröffentlichung nur noch über Verdaccio (`https://npm.elephant-agency.de`); GitHub Packages entfällt
+- **Package Manager:** Umstellung von npm auf pnpm
+- **CSS-Export:** Pfad in `exports` korrigiert (`./dist/react-accessibility-widget.css`)
+
+### Migration
+
+Bestehende Projekte müssen `.npmrc` und Imports anpassen:
+
+```ini
+@elephant:registry=https://npm.elephant-agency.de
+//npm.elephant-agency.de/:_authToken=${NPM_TOKEN}
+```
+
+```bash
+pnpm remove @elephant-webdesign-marketing-gmbh/react-accessibility-widget
+pnpm add @elephant/react-accessibility-widget
+```
+
+```tsx
+// Vorher
+import { AccessibilityWidget } from '@elephant-webdesign-marketing-gmbh/react-accessibility-widget';
+import '@elephant-webdesign-marketing-gmbh/react-accessibility-widget/styles.css';
+
+// Nachher
+import { AccessibilityWidget } from '@elephant/react-accessibility-widget';
+import '@elephant/react-accessibility-widget/styles.css';
+```
+
 ## [1.4.0] - 2026-05-27
 
 ### Added
