@@ -7,6 +7,8 @@ import { SpeechSynthesisStatus } from "./SpeechSynthesisStatus";
 import { extractReadableText, cacheCurrentSelection } from "./extractReadableText";
 import { SpeechChunkQueue, QueueProgress } from "./SpeechChunkQueue";
 import { isPauseResumeSupported, waitForVoices } from "./speechSynthesisBrowserFixes";
+import { I18nStrings, getI18nStrings } from "../i18n";
+import { WidgetLocale } from "../enums/WidgetLocale";
 
 export interface UseSpeechSynthesisOptions {
   /** Speech language (BCP-47, e.g., "de-DE") */
@@ -25,6 +27,8 @@ export interface UseSpeechSynthesisOptions {
   onError?: (error: string) => void;
   /** Callback when speech completes */
   onComplete?: () => void;
+  /** Localized UI strings for error messages (default: German) */
+  strings?: I18nStrings;
 }
 
 export interface UseSpeechSynthesisReturn {
@@ -53,6 +57,7 @@ export interface UseSpeechSynthesisReturn {
  */
 export function useSpeechSynthesis(options: UseSpeechSynthesisOptions): UseSpeechSynthesisReturn {
   const { lang, rate, voiceUri, contentSelector, onStatusChange, onProgress, onError, onComplete } = options;
+  const strings = options.strings ?? getI18nStrings(WidgetLocale.DE);
 
   const [status, setStatus] = useState<SpeechSynthesisStatus>(SpeechSynthesisStatus.IDLE);
   const [progress, setProgress] = useState<QueueProgress>({ current: 0, total: 0 });
@@ -116,7 +121,7 @@ export function useSpeechSynthesis(options: UseSpeechSynthesisOptions): UseSpeec
 
   const speak = useCallback((explicitText?: string) => {
     if (!("speechSynthesis" in window)) {
-      handleError("Text-to-Speech wird von Ihrem Browser nicht unterstützt.");
+      handleError(strings.ttsNotSupported);
       return;
     }
 
@@ -127,7 +132,7 @@ export function useSpeechSynthesis(options: UseSpeechSynthesisOptions): UseSpeec
     });
 
     if (!textToSpeak) {
-      handleError("Kein Text zum Vorlesen gefunden. Bitte wählen Sie Text aus.");
+      handleError(strings.ttsNoTextFound);
       return;
     }
 
@@ -149,12 +154,13 @@ export function useSpeechSynthesis(options: UseSpeechSynthesisOptions): UseSpeec
       onProgress: handleProgress,
       onError: handleError,
       onComplete: handleComplete,
+      strings,
     });
 
     queue.load(textToSpeak);
     queue.start();
     queueRef.current = queue;
-  }, [lang, rate, voiceUri, contentSelector, status, handleStatusChange, handleProgress, handleError, handleComplete]);
+  }, [lang, rate, voiceUri, contentSelector, status, strings, handleStatusChange, handleProgress, handleError, handleComplete]);
 
   const pause = useCallback(() => {
     if (!queueRef.current) return;
@@ -163,10 +169,10 @@ export function useSpeechSynthesis(options: UseSpeechSynthesisOptions): UseSpeec
       queueRef.current.pause();
     } else {
       // Fallback: stop for browsers that don't support pause well
-      handleError("Pause wird von Ihrem Browser nicht vollständig unterstützt. Vorlesen wurde gestoppt.");
+      handleError(strings.ttsPauseNotSupported);
       queueRef.current.stop();
     }
-  }, [handleError]);
+  }, [handleError, strings]);
 
   const resume = useCallback(() => {
     if (!queueRef.current) return;

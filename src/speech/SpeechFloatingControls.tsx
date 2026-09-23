@@ -6,6 +6,7 @@ import { Pause, Play, Square, X } from "lucide-react";
 import { SpeechReadMode } from "../enums/SpeechReadMode";
 import { SpeechSynthesisStatus } from "./SpeechSynthesisStatus";
 import { QueueProgress } from "./SpeechChunkQueue";
+import { I18nStrings } from "../i18n";
 
 export interface SpeechFloatingControlsProps {
   /** Current speech status */
@@ -32,6 +33,8 @@ export interface SpeechFloatingControlsProps {
   onClose: () => void;
   /** Position of the widget (to position controls accordingly) */
   position?: "bottom-right" | "bottom-left" | "top-right" | "top-left";
+  /** Localized UI strings */
+  strings: I18nStrings;
 }
 
 export function SpeechFloatingControls({
@@ -47,6 +50,7 @@ export function SpeechFloatingControls({
   onRateChange,
   onClose,
   position = "bottom-right",
+  strings,
 }: SpeechFloatingControlsProps) {
   const isSpeaking = status === SpeechSynthesisStatus.SPEAKING;
   const isPaused = status === SpeechSynthesisStatus.PAUSED;
@@ -73,7 +77,7 @@ export function SpeechFloatingControls({
     <div 
       className={`a11y-speech-floating-bar ${getPositionClass()}`}
       role="toolbar"
-      aria-label="Vorlese-Steuerung"
+      aria-label={strings.ttsControlLabel}
       data-a11y-widget
     >
       {/* Play/Pause/Resume Button */}
@@ -89,8 +93,8 @@ export function SpeechFloatingControls({
             onPause();
           }
         }}
-        aria-label={isIdle ? "Vorlesen starten" : isPaused ? "Fortsetzen" : "Pause"}
-        title={isIdle ? "Vorlesen starten" : isPaused ? "Fortsetzen" : "Pause"}
+        aria-label={isIdle ? strings.ttsStart : isPaused ? strings.ttsResume : strings.ttsPause}
+        title={isIdle ? strings.ttsStart : isPaused ? strings.ttsResume : strings.ttsPause}
       >
         {isIdle || isPaused ? (
           <Play className="a11y-speech-control-icon" aria-hidden="true" />
@@ -105,32 +109,32 @@ export function SpeechFloatingControls({
           type="button"
           className="a11y-speech-control-btn a11y-speech-control-stop"
           onClick={onStop}
-          aria-label="Stoppen"
-          title="Stoppen"
+          aria-label={strings.ttsStop}
+          title={strings.ttsStop}
         >
           <Square className="a11y-speech-control-icon" aria-hidden="true" />
         </button>
       )}
 
       {/* Mode Toggle */}
-      <div className="a11y-speech-mode-toggle" role="group" aria-label="Lesemodus">
+      <div className="a11y-speech-mode-toggle" role="group" aria-label={strings.ttsModeGroupLabel}>
         <button
           type="button"
           className={`a11y-speech-mode-btn ${readMode === SpeechReadMode.AUTO ? "active" : ""}`}
           onClick={() => onModeChange(SpeechReadMode.AUTO)}
           aria-pressed={readMode === SpeechReadMode.AUTO}
-          title="Automatisch vorlesen"
+          title={strings.ttsModeAuto}
         >
-          Auto
+          {strings.ttsModeAutoShort}
         </button>
         <button
           type="button"
           className={`a11y-speech-mode-btn ${readMode === SpeechReadMode.HIGHLIGHT ? "active" : ""}`}
           onClick={() => onModeChange(SpeechReadMode.HIGHLIGHT)}
           aria-pressed={readMode === SpeechReadMode.HIGHLIGHT}
-          title="Mit Hervorhebung vorlesen"
+          title={strings.ttsModeHighlight}
         >
-          Highlight
+          {strings.ttsModeHighlightShort}
         </button>
       </div>
 
@@ -142,7 +146,7 @@ export function SpeechFloatingControls({
       )}
 
       {/* Speed Control */}
-      <div className="a11y-speech-speed-control" role="group" aria-label="Geschwindigkeit">
+      <div className="a11y-speech-speed-control" role="group" aria-label={strings.ttsSpeedGroupLabel}>
         <label htmlFor="speech-rate-slider" className="a11y-speech-speed-label">
           {speechRate.toFixed(1)}x
         </label>
@@ -155,8 +159,8 @@ export function SpeechFloatingControls({
           value={speechRate}
           onChange={(e) => onRateChange(parseFloat(e.target.value))}
           className="a11y-speech-speed-slider"
-          aria-label="Vorlese-Geschwindigkeit"
-          title={`Geschwindigkeit: ${speechRate.toFixed(1)}x`}
+          aria-label={strings.ttsSpeedSliderLabel}
+          title={`${strings.ttsSpeedGroupLabel}: ${speechRate.toFixed(1)}x`}
         />
       </div>
 
@@ -165,8 +169,8 @@ export function SpeechFloatingControls({
         type="button"
         className="a11y-speech-control-btn a11y-speech-control-close"
         onClick={onClose}
-        aria-label="Steuerung ausblenden"
-        title="Steuerung ausblenden"
+        aria-label={strings.ttsHideControls}
+        title={strings.ttsHideControls}
       >
         <X className="a11y-speech-control-icon" aria-hidden="true" />
       </button>

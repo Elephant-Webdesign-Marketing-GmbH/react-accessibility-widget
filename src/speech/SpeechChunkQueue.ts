@@ -4,6 +4,8 @@
 
 import { SpeechSynthesisStatus } from "./SpeechSynthesisStatus";
 import { findBestVoice } from "./speechSynthesisBrowserFixes";
+import { I18nStrings, getI18nStrings } from "../i18n";
+import { WidgetLocale } from "../enums/WidgetLocale";
 
 export interface SpeechChunk {
   text: string;
@@ -32,6 +34,8 @@ export interface SpeechChunkQueueOptions {
   onError?: (error: string) => void;
   /** Callback on queue completion */
   onComplete?: () => void;
+  /** Localized UI strings for error messages (default: German) */
+  strings?: I18nStrings;
 }
 
 /**
@@ -100,6 +104,7 @@ export class SpeechChunkQueue {
       onProgress: () => {},
       onError: () => {},
       onComplete: () => {},
+      strings: getI18nStrings(WidgetLocale.DE),
       ...options,
     };
   }
@@ -113,7 +118,7 @@ export class SpeechChunkQueue {
     this.isPausedManually = false;
     
     if (this.chunks.length === 0) {
-      this.options.onError?.("Kein Text zum Vorlesen gefunden.");
+      this.options.onError?.(this.options.strings.ttsNoTextFound);
       return;
     }
   }
@@ -123,12 +128,12 @@ export class SpeechChunkQueue {
    */
   start(): void {
     if (this.chunks.length === 0) {
-      this.options.onError?.("Keine Chunks geladen. Bitte load() zuerst aufrufen.");
+      this.options.onError?.(this.options.strings.ttsNoTextFound);
       return;
     }
 
     if (!("speechSynthesis" in window)) {
-      this.options.onError?.("Text-to-Speech wird von Ihrem Browser nicht unterstützt.");
+      this.options.onError?.(this.options.strings.ttsNotSupported);
       return;
     }
 
@@ -268,7 +273,7 @@ export class SpeechChunkQueue {
       if (event.error === "canceled" || event.error === "interrupted") {
         return;
       }
-      this.options.onError?.(`Fehler beim Vorlesen: ${event.error}`);
+      this.options.onError?.(`${this.options.strings.ttsError}: ${event.error}`);
       this.updateStatus(SpeechSynthesisStatus.ERROR);
     };
 

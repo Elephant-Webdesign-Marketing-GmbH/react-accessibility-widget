@@ -8,4 +8,4 @@ export { SpeechReadMode } from './enums/SpeechReadMode';
 export { WidgetLocale } from './enums/WidgetLocale';
 export type { A11ySettingsChangeDetail } from './types/A11ySettingsChangeDetail';
 export { isVisualSettingsActive } from './utils/isVisualSettingsActive';
-export type { I18nStrings } from './speech/i18n';
+export type { I18nStrings } from './i18n';

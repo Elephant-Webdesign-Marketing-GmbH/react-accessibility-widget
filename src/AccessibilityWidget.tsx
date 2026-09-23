@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, forwardRef, useImperativeHandle, useCallback } from "react";
+import { useEffect, useState, useRef, forwardRef, useImperativeHandle, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
 import {
   X,
@@ -19,6 +19,8 @@ import "./styles.css";
 import { FontSizeScalingMode } from "./enums/FontSizeScalingMode";
 import { ForceDefaultCursorMode } from "./enums/ForceDefaultCursorMode";
 import { SpeechReadMode } from "./enums/SpeechReadMode";
+import { WidgetLocale } from "./enums/WidgetLocale";
+import { detectLocale, getI18nStrings } from "./i18n";
 import { A11Y_WIDGET_Z_INDEX } from "./constants/A11yZIndex";
 import { WIDGET_VERSION } from "./constants/WidgetVersion";
 import { dispatchA11ySettingsChange } from "./events/dispatchA11ySettingsChange";
@@ -82,6 +84,8 @@ export interface AccessibilityWidgetProps {
    * Dispatches `a11y-settings-change` so host pages can hide JS-based custom cursors.
    */
   forceDefaultCursor?: ForceDefaultCursorMode | false;
+  /** UI language (default: detected from document lang, falls back to German) */
+  locale?: WidgetLocale;
 }
 
 /**
@@ -189,9 +193,11 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
       readContentSelector = "#main-content",
       fontSizeScaling = "auto",
       forceDefaultCursor = false,
+      locale,
     }: AccessibilityWidgetProps = {},
     ref
   ) {
+  const t = useMemo(() => getI18nStrings(locale ?? detectLocale()), [locale]);
   const [isOpen, setIsOpen] = useState(false);
   const [settings, setSettings] = useState<AccessibilitySettings>(DEFAULT_SETTINGS);
   const [showFloatingControls, setShowFloatingControls] = useState(false);
@@ -215,21 +221,21 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
   // Memoize callbacks to prevent infinite re-renders
   const handleStatusChange = useCallback((status: SpeechSynthesisStatus) => {
     if (status === SpeechSynthesisStatus.SPEAKING) {
-      setSpeechStatus("Vorlesen gestartet");
+      setSpeechStatus(t.ttsStarted);
     } else if (status === SpeechSynthesisStatus.PAUSED) {
-      setSpeechStatus("Pausiert");
+      setSpeechStatus(t.ttsPaused);
     } else if (status === SpeechSynthesisStatus.ERROR) {
-      setSpeechStatus("Fehler beim Vorlesen");
+      setSpeechStatus(t.ttsError);
     }
-  }, []);
+  }, [t]);
 
   const handleError = useCallback((error: string) => {
     setSpeechStatus(error);
   }, []);
 
   const handleComplete = useCallback(() => {
-    setSpeechStatus("Vorlesen beendet");
-  }, []);
+    setSpeechStatus(t.ttsFinished);
+  }, [t]);
 
   // Use the speech synthesis hook
   const speechSynthesis = useSpeechSynthesis({
@@ -240,6 +246,7 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
     onStatusChange: handleStatusChange,
     onError: handleError,
     onComplete: handleComplete,
+    strings: t,
   });
 
   // Extract stable functions for use in dependencies
@@ -706,8 +713,8 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
         className="a11y-widget-trigger"
         style={getPositionStyles()}
         onClick={() => setIsOpen(true)}
-        aria-label="Open Accessibility Settings (Alt + A)"
-        title="Open Accessibility Settings (Alt + A)"
+        aria-label={t.triggerLabel}
+        title={t.triggerLabel}
         data-a11y-widget
       >
         <PersonStanding className="a11y-widget-trigger-icon" aria-hidden="true" />
@@ -739,19 +746,19 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
           <div className="a11y-widget-header">
             <div className="a11y-widget-header-title">
               <PersonStanding className="a11y-widget-header-icon" aria-hidden="true" />
-              <h2 id="a11y-widget-title">Accessibility Settings</h2>
+              <h2 id="a11y-widget-title">{t.dialogTitle}</h2>
             </div>
             <button
               type="button"
               className="a11y-widget-close-btn"
               onClick={() => setIsOpen(false)}
-              aria-label="Close"
+              aria-label={t.close}
             >
               <X className="a11y-icon" aria-hidden="true" />
             </button>
           </div>
           <p className="a11y-widget-description">
-            Customize the display and features to your individual needs
+            {t.dialogDescription}
           </p>
 
           {/* Scrollable Content */}
@@ -760,19 +767,19 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
             <div className="a11y-widget-section">
               <h3 className="a11y-widget-section-title">
                 <Type className="a11y-section-icon" aria-hidden="true" />
-                Text & Font
+                {t.textSectionTitle}
               </h3>
 
               {/* Font Size */}
               <div className="a11y-widget-control">
-                <label className="a11y-widget-label">Font Size</label>
+                <label className="a11y-widget-label">{t.fontSizeLabel}</label>
                 <div className="a11y-widget-control-row">
                   <button
                     type="button"
                     className="a11y-btn a11y-btn-outline"
                     onClick={decreaseFontSize}
                     disabled={settings.fontSize <= 80}
-                    aria-label="Decrease font size"
+                    aria-label={t.fontSizeDecrease}
                   >
                     <ZoomOut className="a11y-icon" aria-hidden="true" />
                   </button>
@@ -784,7 +791,7 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
                     className="a11y-btn a11y-btn-outline"
                     onClick={increaseFontSize}
                     disabled={settings.fontSize >= 150}
-                    aria-label="Increase font size"
+                    aria-label={t.fontSizeIncrease}
                   >
                     <ZoomIn className="a11y-icon" aria-hidden="true" />
                   </button>
@@ -793,7 +800,7 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
 
               {/* Font Family */}
               <div className="a11y-widget-control">
-                <label className="a11y-widget-label">Font Family</label>
+                <label className="a11y-widget-label">{t.fontFamilyLabel}</label>
                 <div className="a11y-widget-button-grid">
                   <button
                     type="button"
@@ -801,7 +808,7 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
                     onClick={() => updateSettings({ fontFamily: "default" })}
                     aria-pressed={settings.fontFamily === "default"}
                   >
-                    Default
+                    {t.fontFamilyDefault}
                   </button>
                   <button
                     type="button"
@@ -809,7 +816,7 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
                     onClick={() => updateSettings({ fontFamily: "dyslexic" })}
                     aria-pressed={settings.fontFamily === "dyslexic"}
                   >
-                    Dyslexia-Friendly
+                    {t.fontFamilyDyslexic}
                   </button>
                   <button
                     type="button"
@@ -817,7 +824,7 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
                     onClick={() => updateSettings({ fontFamily: "arial" })}
                     aria-pressed={settings.fontFamily === "arial"}
                   >
-                    Arial (Sans-Serif)
+                    {t.fontFamilyArial}
                   </button>
                   <button
                     type="button"
@@ -825,7 +832,7 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
                     onClick={() => updateSettings({ fontFamily: "serif" })}
                     aria-pressed={settings.fontFamily === "serif"}
                   >
-                    Serif (Classic)
+                    {t.fontFamilySerif}
                   </button>
                 </div>
               </div>
@@ -834,7 +841,7 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
               <div className="a11y-widget-control">
                 <label className="a11y-widget-label">
                   <AlignLeft className="a11y-label-icon" aria-hidden="true" />
-                  Line Height
+                  {t.lineHeightLabel}
                 </label>
                 <div className="a11y-widget-button-grid a11y-widget-button-grid-3">
                   <button
@@ -843,7 +850,7 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
                     onClick={() => updateSettings({ lineHeight: "normal" })}
                     aria-pressed={settings.lineHeight === "normal"}
                   >
-                    Normal
+                    {t.lineHeightNormal}
                   </button>
                   <button
                     type="button"
@@ -851,7 +858,7 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
                     onClick={() => updateSettings({ lineHeight: "relaxed" })}
                     aria-pressed={settings.lineHeight === "relaxed"}
                   >
-                    Relaxed
+                    {t.lineHeightRelaxed}
                   </button>
                   <button
                     type="button"
@@ -859,14 +866,14 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
                     onClick={() => updateSettings({ lineHeight: "loose" })}
                     aria-pressed={settings.lineHeight === "loose"}
                   >
-                    Loose
+                    {t.lineHeightLoose}
                   </button>
                 </div>
               </div>
 
               {/* Letter Spacing */}
               <div className="a11y-widget-control">
-                <label className="a11y-widget-label">Letter Spacing</label>
+                <label className="a11y-widget-label">{t.letterSpacingLabel}</label>
                 <div className="a11y-widget-button-grid a11y-widget-button-grid-3">
                   <button
                     type="button"
@@ -874,7 +881,7 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
                     onClick={() => updateSettings({ letterSpacing: "normal" })}
                     aria-pressed={settings.letterSpacing === "normal"}
                   >
-                    Normal
+                    {t.letterSpacingNormal}
                   </button>
                   <button
                     type="button"
@@ -882,7 +889,7 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
                     onClick={() => updateSettings({ letterSpacing: "wide" })}
                     aria-pressed={settings.letterSpacing === "wide"}
                   >
-                    Wide
+                    {t.letterSpacingWide}
                   </button>
                   <button
                     type="button"
@@ -890,7 +897,7 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
                     onClick={() => updateSettings({ letterSpacing: "wider" })}
                     aria-pressed={settings.letterSpacing === "wider"}
                   >
-                    Very Wide
+                    {t.letterSpacingWider}
                   </button>
                 </div>
               </div>
@@ -902,14 +909,14 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
             <div className="a11y-widget-section">
               <h3 className="a11y-widget-section-title">
                 <Eye className="a11y-section-icon" aria-hidden="true" />
-                Visual Adjustments
+                {t.visualSectionTitle}
               </h3>
 
               {/* Contrast Mode */}
               <div className="a11y-widget-control">
                 <label className="a11y-widget-label">
                   <Contrast className="a11y-label-icon" aria-hidden="true" />
-                  Contrast Mode
+                  {t.contrastLabel}
                 </label>
                 <div className="a11y-widget-button-grid">
                   <button
@@ -918,7 +925,7 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
                     onClick={() => updateSettings({ contrastMode: "normal" })}
                     aria-pressed={settings.contrastMode === "normal"}
                   >
-                    Normal
+                    {t.contrastNormal}
                   </button>
                   <button
                     type="button"
@@ -926,7 +933,7 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
                     onClick={() => updateSettings({ contrastMode: "high" })}
                     aria-pressed={settings.contrastMode === "high"}
                   >
-                    High Contrast
+                    {t.contrastHigh}
                   </button>
                   <button
                     type="button"
@@ -934,7 +941,7 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
                     onClick={() => updateSettings({ contrastMode: "dark" })}
                     aria-pressed={settings.contrastMode === "dark"}
                   >
-                    Dark Mode
+                    {t.contrastDark}
                   </button>
                   <button
                     type="button"
@@ -942,11 +949,11 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
                     onClick={() => updateSettings({ contrastMode: "yellow-black" })}
                     aria-pressed={settings.contrastMode === "yellow-black"}
                   >
-                    Yellow/Black
+                    {t.contrastYellowBlack}
                   </button>
                 </div>
                 <p className="a11y-widget-hint">
-                  Yellow/Black is particularly readable and reduces eye strain
+                  {t.contrastHint}
                 </p>
               </div>
 
@@ -954,7 +961,7 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
               <div className="a11y-widget-control">
                 <label className="a11y-widget-label">
                   <Palette className="a11y-label-icon" aria-hidden="true" />
-                  Color Filters (Color Blindness)
+                  {t.colorFilterLabel}
                 </label>
                 <div className="a11y-widget-button-grid">
                   <button
@@ -963,7 +970,7 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
                     onClick={() => updateSettings({ colorBlindMode: "none" })}
                     aria-pressed={settings.colorBlindMode === "none"}
                   >
-                    No Filter
+                    {t.colorFilterNone}
                   </button>
                   <button
                     type="button"
@@ -971,7 +978,7 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
                     onClick={() => updateSettings({ colorBlindMode: "protanopia" })}
                     aria-pressed={settings.colorBlindMode === "protanopia"}
                   >
-                    Protanopia (Red)
+                    {t.colorFilterProtanopia}
                   </button>
                   <button
                     type="button"
@@ -979,7 +986,7 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
                     onClick={() => updateSettings({ colorBlindMode: "deuteranopia" })}
                     aria-pressed={settings.colorBlindMode === "deuteranopia"}
                   >
-                    Deuteranopia (Green)
+                    {t.colorFilterDeuteranopia}
                   </button>
                   <button
                     type="button"
@@ -987,11 +994,11 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
                     onClick={() => updateSettings({ colorBlindMode: "tritanopia" })}
                     aria-pressed={settings.colorBlindMode === "tritanopia"}
                   >
-                    Tritanopia (Blue)
+                    {t.colorFilterTritanopia}
                   </button>
                 </div>
                 <p className="a11y-widget-hint">
-                  Adjusts colors to make them more distinguishable for people with color blindness
+                  {t.colorFilterHint}
                 </p>
               </div>
 
@@ -999,7 +1006,7 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
               <div className="a11y-widget-control">
                 <label className="a11y-widget-label">
                   <Maximize2 className="a11y-label-icon" aria-hidden="true" />
-                  UI Scaling (Buttons & Icons)
+                  {t.uiScaleLabel}
                 </label>
                 <div className="a11y-widget-control-row">
                   <button
@@ -1007,7 +1014,7 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
                     className="a11y-btn a11y-btn-outline"
                     onClick={decreaseUIScale}
                     disabled={settings.uiScale <= 80}
-                    aria-label="Decrease UI elements"
+                    aria-label={t.uiScaleDecrease}
                   >
                     <ZoomOut className="a11y-icon" aria-hidden="true" />
                   </button>
@@ -1019,13 +1026,13 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
                     className="a11y-btn a11y-btn-outline"
                     onClick={increaseUIScale}
                     disabled={settings.uiScale >= 150}
-                    aria-label="Increase UI elements"
+                    aria-label={t.uiScaleIncrease}
                   >
                     <ZoomIn className="a11y-icon" aria-hidden="true" />
                   </button>
                 </div>
                 <p className="a11y-widget-hint">
-                  Enlarges buttons, icons, and other interactive elements
+                  {t.uiScaleHint}
                 </p>
               </div>
             </div>
@@ -1036,38 +1043,38 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
             <div className="a11y-widget-section">
               <h3 className="a11y-widget-section-title">
                 <Focus className="a11y-section-icon" aria-hidden="true" />
-                Interaction & Navigation
+                {t.interactionSectionTitle}
               </h3>
 
               {/* Focus Mode */}
               <div className="a11y-widget-control">
-                <label className="a11y-widget-label">Focus Mode (Keyboard Navigation)</label>
+                <label className="a11y-widget-label">{t.focusModeLabel}</label>
                 <button
                   type="button"
                   className={`a11y-btn a11y-btn-full ${settings.focusMode ? "a11y-btn-active" : "a11y-btn-outline"}`}
                   onClick={() => updateSettings({ focusMode: !settings.focusMode })}
                   aria-pressed={settings.focusMode}
                 >
-                  {settings.focusMode ? "Enabled" : "Disabled"}
+                  {settings.focusMode ? t.enabled : t.disabled}
                 </button>
                 <p className="a11y-widget-hint">
-                  Highlights focused elements more prominently for better keyboard navigation
+                  {t.focusModeHint}
                 </p>
               </div>
 
               {/* Reduced Motion */}
               <div className="a11y-widget-control">
-                <label className="a11y-widget-label">Reduce Motion</label>
+                <label className="a11y-widget-label">{t.reducedMotionLabel}</label>
                 <button
                   type="button"
                   className={`a11y-btn a11y-btn-full ${settings.reducedMotion ? "a11y-btn-active" : "a11y-btn-outline"}`}
                   onClick={() => updateSettings({ reducedMotion: !settings.reducedMotion })}
                   aria-pressed={settings.reducedMotion}
                 >
-                  {settings.reducedMotion ? "Enabled" : "Disabled"}
+                  {settings.reducedMotion ? t.enabled : t.disabled}
                 </button>
                 <p className="a11y-widget-hint">
-                  Disables animations for users sensitive to motion
+                  {t.reducedMotionHint}
                 </p>
               </div>
             </div>
@@ -1078,22 +1085,22 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
             <div className="a11y-widget-section">
               <h3 className="a11y-widget-section-title">
                 <Volume2 className="a11y-section-icon" aria-hidden="true" />
-                Text-to-Speech
+                {t.ttsTitle}
               </h3>
 
               {/* Text to Speech Toggle */}
               <div className="a11y-widget-control">
-                <label className="a11y-widget-label">Read Aloud Feature</label>
+                <label className="a11y-widget-label">{t.ttsReadAloudLabel}</label>
                 <button
                   type="button"
                   className={`a11y-btn a11y-btn-full ${settings.textToSpeech ? "a11y-btn-active" : "a11y-btn-outline"}`}
                   onClick={toggleTextToSpeech}
                   aria-pressed={settings.textToSpeech}
                 >
-                  {settings.textToSpeech ? "Enabled" : "Disabled"}
+                  {settings.textToSpeech ? t.enabled : t.disabled}
                 </button>
                 <p className="a11y-widget-hint">
-                  Enables reading of selected text or the entire page
+                  {t.ttsReadAloudHint}
                 </p>
               </div>
 
@@ -1102,7 +1109,7 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
                 <>
                   {/* Speech Rate */}
                   <div className="a11y-widget-control">
-                    <label className="a11y-widget-label">Speech Rate</label>
+                    <label className="a11y-widget-label">{t.ttsSpeechRateLabel}</label>
                     <div className="a11y-widget-control-row">
                       <button
                         type="button"
@@ -1113,9 +1120,9 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
                           })
                         }
                         disabled={settings.speechRate <= 0.5}
-                        aria-label="Slower"
+                        aria-label={t.ttsSlower}
                       >
-                        Slower
+                        {t.ttsSlower}
                       </button>
                       <span className="a11y-widget-value">{settings.speechRate}x</span>
                       <button
@@ -1127,9 +1134,9 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
                           })
                         }
                         disabled={settings.speechRate >= 2}
-                        aria-label="Faster"
+                        aria-label={t.ttsFaster}
                       >
-                        Faster
+                        {t.ttsFaster}
                       </button>
                     </div>
                   </div>
@@ -1144,17 +1151,17 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
                       {isSpeaking ? (
                         <>
                           <VolumeX className="a11y-btn-icon" aria-hidden="true" />
-                          Stop Reading
+                          {t.ttsStopReadingLabel}
                         </>
                       ) : (
                         <>
                           <Volume2 className="a11y-btn-icon" aria-hidden="true" />
-                          Read Text
+                          {t.ttsReadTextLabel}
                         </>
                       )}
                     </button>
                     <p className="a11y-widget-hint">
-                      Select text or let the entire page be read aloud. Controls appear when reading starts.
+                      {t.ttsReadHint}
                     </p>
                   </div>
                 </>
@@ -1170,11 +1177,11 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
                 className="a11y-btn a11y-btn-outline a11y-btn-full"
                 onClick={resetSettings}
               >
-                Reset All Settings
+                {t.resetAll}
               </button>
             </div>
 
-            <p className="a11y-widget-version" aria-label={`Version ${WIDGET_VERSION}`}>
+            <p className="a11y-widget-version" aria-label={`${t.version} ${WIDGET_VERSION}`}>
               v{WIDGET_VERSION}
             </p>
           </div>
@@ -1198,6 +1205,7 @@ export const AccessibilityWidget = forwardRef<AccessibilityWidgetRef, Accessibil
           onRateChange={handleRateChange}
           onClose={() => setShowFloatingControls(true)}
           position={position}
+          strings={t}
         />
       )}
     </>

@@ -294,7 +294,17 @@ interface AccessibilityWidgetProps {
    * - ForceDefaultCursorMode.ALWAYS: always while the widget is mounted
    */
   forceDefaultCursor?: ForceDefaultCursorMode | false;
+  /** UI language (default: detected from <html lang>, falls back to German) */
+  locale?: WidgetLocale;
 }
+```
+
+**UI-Sprache:** Alle Texte für Nutzer sind standardmäßig deutsch. Bei `<html lang="en">` wird automatisch Englisch verwendet; explizit setzen mit:
+
+```tsx
+import { AccessibilityWidget, WidgetLocale } from '@elephant/react-accessibility-widget';
+
+<AccessibilityWidget locale={WidgetLocale.DE} />
 ```
 
 **Position Behavior:**
