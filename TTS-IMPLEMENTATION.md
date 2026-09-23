@@ -28,7 +28,7 @@ Die Vorlese-Funktion basiert auf der Web Speech API und bietet erweiterte Featur
 4. **`speechSynthesisBrowserFixes.ts`** - Browser-spezifische Fixes
    - Voice-Loading mit `onvoiceschanged` Event
    - Pause/Resume-Support-Detection (Safari-Fix)
-   - **Wichtig**: Bevorzugt lokale macOS-Stimmen über Chrome's "Google Deutsch"
+   - **Wichtig**: Verwendet ausschließlich lokale Stimmen (`localService`), keine Cloud-Stimmen
 
 5. **`SpeechFloatingControls.tsx`** - Schwebender Control-Dialog
    - Play/Pause/Stop Buttons
@@ -40,20 +40,22 @@ Die Vorlese-Funktion basiert auf der Web Speech API und bietet erweiterte Featur
 
 ### Voice Selection (KRITISCH für Chrome!)
 
-Die Voice-Selection bevorzugt **lokale System-Stimmen** über Chrome's eigene Cloud-Stimmen:
+Die Voice-Selection verwendet **ausschließlich lokale Stimmen** (`voice.localService === true`):
 
 ```typescript
-// Priorität:
-// 1. Lokale System-Stimmen (Anna, Yannick, etc.) - ZUVERLÄSSIG
-// 2. Premium/Enhanced Stimmen
+// Priorität (nur lokale Stimmen):
+// 1. Premium/Enhanced Stimmen
+// 2. Exakte Sprach-Übereinstimmung
 // 3. Erste passende Stimme
 
-const localVoice = matchingVoices.find((voice) => 
-  voice.localService && !voice.name.toLowerCase().includes('google')
-);
+export function getLocalVoices(): SpeechSynthesisVoice[] {
+  return window.speechSynthesis.getVoices().filter((voice) => voice.localService);
+}
 ```
 
-**Warum?** Chrome's "Google Deutsch" Stimme funktioniert nicht zuverlässig auf macOS Chrome, während lokale Stimmen (wie "Anna") perfekt funktionieren.
+**Warum?** Cloud-Stimmen (Chrome "Google Deutsch", Edge "Online (Natural)") senden den vorgelesenen Text an Server Dritter – das ist nicht DSGVO-konform. Zusätzlich funktioniert "Google Deutsch" auf macOS Chrome nicht zuverlässig.
+
+Ist keine lokale Stimme für die Sprache installiert, startet das Vorlesen nicht und es erscheint die Meldung `ttsNoLocalVoice`. Die Stimme wird immer explizit gesetzt, damit der Browser nicht selbst auf eine Cloud-Stimme ausweicht.
 
 ### React State Management
 

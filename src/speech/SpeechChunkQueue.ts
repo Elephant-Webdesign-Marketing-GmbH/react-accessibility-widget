@@ -3,7 +3,7 @@
  */
 
 import { SpeechSynthesisStatus } from "./SpeechSynthesisStatus";
-import { findBestVoice } from "./speechSynthesisBrowserFixes";
+import { findBestVoice, getLocalVoiceByUri } from "./speechSynthesisBrowserFixes";
 import { I18nStrings, getI18nStrings } from "../i18n";
 import { WidgetLocale } from "../enums/WidgetLocale";
 
@@ -95,6 +95,7 @@ export class SpeechChunkQueue {
   private status: SpeechSynthesisStatus = SpeechSynthesisStatus.IDLE;
   private currentUtterance: SpeechSynthesisUtterance | null = null;
   private isPausedManually: boolean = false;
+  private voice: SpeechSynthesisVoice | null = null;
   private options: Required<Omit<SpeechChunkQueueOptions, "voiceUri">> & { voiceUri?: string | null };
 
   constructor(options: SpeechChunkQueueOptions) {
@@ -140,6 +141,15 @@ export class SpeechChunkQueue {
     // If paused, resume instead
     if (this.status === SpeechSynthesisStatus.PAUSED && this.currentUtterance) {
       this.resume();
+      return;
+    }
+
+    // Only use on-device voices: remote voices send the text to third parties
+    this.voice =
+      (this.options.voiceUri && getLocalVoiceByUri(this.options.voiceUri)) ||
+      findBestVoice(this.options.lang);
+    if (!this.voice) {
+      this.options.onError?.(this.options.strings.ttsNoLocalVoice);
       return;
     }
 
@@ -234,16 +244,8 @@ export class SpeechChunkQueue {
     utterance.lang = this.options.lang;
     utterance.rate = this.options.rate;
 
-    // Set voice - prefer premium/enhanced voices for natural sound
-    if (this.options.voiceUri) {
-      const voices = window.speechSynthesis.getVoices();
-      const voice = voices.find((v) => v.voiceURI === this.options.voiceUri);
-      if (voice) utterance.voice = voice;
-    } else {
-      // Auto-select best voice (prefers premium/enhanced)
-      const bestVoice = findBestVoice(this.options.lang);
-      if (bestVoice) utterance.voice = bestVoice;
-    }
+    // Always set an explicit local voice, otherwise the browser may pick a remote default
+    if (this.voice) utterance.voice = this.voice;
 
     utterance.onstart = () => {
       this.updateStatus(SpeechSynthesisStatus.SPEAKING);

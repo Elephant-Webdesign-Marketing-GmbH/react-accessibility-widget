@@ -1,7 +1,21 @@
 /* =============== FONTS =============== */
 
-/* OpenDyslexic Font */
-@import url("https://fonts.googleapis.com/css2?family=OpenDyslexic:wght@400;700&display=swap");
+/* OpenDyslexic Font (self-hosted, SIL OFL 1.1 – no external requests for GDPR compliance) */
+@font-face {
+  font-family: "OpenDyslexic";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./fonts/OpenDyslexic-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "OpenDyslexic";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("./fonts/OpenDyslexic-Bold.woff2") format("woff2");
+}
 
 /* =============== ACCESSIBILITY UTILITIES =============== */
 

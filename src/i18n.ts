@@ -89,6 +89,7 @@ export interface I18nStrings {
   // TTS Status Messages
   ttsNotSupported: string;
   ttsNoTextFound: string;
+  ttsNoLocalVoice: string;
   ttsStarted: string;
   ttsPaused: string;
   ttsFinished: string;
@@ -185,6 +186,7 @@ const deStrings: I18nStrings = {
   // TTS Status Messages
   ttsNotSupported: "Vorlesen wird von Ihrem Browser nicht unterstützt.",
   ttsNoTextFound: "Kein Text zum Vorlesen gefunden. Bitte wählen Sie Text aus.",
+  ttsNoLocalVoice: "Keine lokale Stimme für diese Sprache installiert. Aus Datenschutzgründen werden keine Online-Stimmen verwendet.",
   ttsStarted: "Vorlesen gestartet",
   ttsPaused: "Pausiert",
   ttsFinished: "Vorlesen beendet",
@@ -281,6 +283,7 @@ const enStrings: I18nStrings = {
   // TTS Status Messages
   ttsNotSupported: "Text-to-speech is not supported by your browser.",
   ttsNoTextFound: "No text found to read. Please select some text.",
+  ttsNoLocalVoice: "No local voice installed for this language. Online voices are not used for privacy reasons.",
   ttsStarted: "Reading started",
   ttsPaused: "Paused",
   ttsFinished: "Reading finished",

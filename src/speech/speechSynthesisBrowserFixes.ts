@@ -40,6 +40,25 @@ export function waitForVoices(): Promise<SpeechSynthesisVoice[]> {
 }
 
 /**
+ * Get on-device voices only. Remote voices (e.g. Chrome's "Google Deutsch",
+ * Edge's "Online (Natural)" voices) send the spoken text to third-party
+ * servers, which is not GDPR compliant.
+ * @returns Array of local voices
+ */
+export function getLocalVoices(): SpeechSynthesisVoice[] {
+  return window.speechSynthesis.getVoices().filter((voice) => voice.localService);
+}
+
+/**
+ * Get local voice by URI
+ * @param voiceUri Voice URI from SpeechSynthesisVoice
+ * @returns Matching local voice or null
+ */
+export function getLocalVoiceByUri(voiceUri: string): SpeechSynthesisVoice | null {
+  return getLocalVoices().find((voice) => voice.voiceURI === voiceUri) || null;
+}
+
+/**
  * Get voices filtered by language prefix
  * @param langPrefix Language prefix (e.g., "de", "en")
  * @returns Array of matching voices
@@ -55,27 +74,18 @@ export function getVoicesByLanguage(langPrefix: string): SpeechSynthesisVoice[] 
  * @returns Best matching voice or null
  */
 export function findBestVoice(lang: string): SpeechSynthesisVoice | null {
-  const voices = window.speechSynthesis.getVoices();
-  
+  const voices = getLocalVoices();
+
   const langPrefix = lang.split("-")[0];
-  
+
   // Filter voices by language
-  const matchingVoices = voices.filter((voice) => 
+  const matchingVoices = voices.filter((voice) =>
     voice.lang === lang || voice.lang.startsWith(langPrefix)
   );
-  
+
   if (matchingVoices.length === 0) return null;
-  
-  // IMPORTANT: Prioritize LOCAL system voices for reliability
-  // Chrome's "Google Deutsch" voice has known issues on macOS Chrome
-  // Local macOS voices (Anna, Yannick, etc.) work reliably
-  const localVoice = matchingVoices.find((voice) => 
-    voice.localService && !voice.name.toLowerCase().includes('google')
-  );
-  
-  if (localVoice) return localVoice;
-  
-  // Fallback: Premium/enhanced voices
+
+  // Premium/enhanced voices
   const premiumVoice = matchingVoices.find((voice) => 
     voice.name.toLowerCase().includes('premium') ||
     voice.name.toLowerCase().includes('enhanced') ||
@@ -109,7 +119,7 @@ export function getVoiceByUri(voiceUri: string): SpeechSynthesisVoice | null {
  * @returns Array of voice options with labels
  */
 export function formatVoicesForUI(langPrefix?: string): VoiceOption[] {
-  let voices = window.speechSynthesis.getVoices();
+  let voices = getLocalVoices();
   
   if (langPrefix) {
     voices = voices.filter((voice) => voice.lang.toLowerCase().startsWith(langPrefix.toLowerCase()));

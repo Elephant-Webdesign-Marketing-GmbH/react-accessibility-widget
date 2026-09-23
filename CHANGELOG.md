@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-09-23
+
+### Changed
+
+- **Keine externen Aufrufe mehr (DSGVO)**: OpenDyslexic wird jetzt mit dem Paket ausgeliefert (`dist/fonts/`, SIL OFL 1.1) statt über `fonts.googleapis.com` geladen. Die Schriftdateien liegen separat, damit die CSS klein bleibt (14 kB) und die Schrift nur bei Aktivierung geladen wird
+- **Vorlesen nur mit lokalen Stimmen**: Cloud-Stimmen (z. B. Chrome „Google Deutsch“) senden den Text an Dritte und werden nicht mehr verwendet oder in der Auswahl angezeigt. Ohne lokale Stimme erscheint die neue Meldung `ttsNoLocalVoice`
+
 ## [1.6.0] - 2026-09-23
 
 ### Added
