@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.5.0] - 2026-09-23
+## [1.6.0] - 2026-09-23
 
 ### Added
 
@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Standardsprache Deutsch**: Der Einstellungsdialog war bisher fest auf Englisch und ist jetzt standardmäßig deutsch
 - `i18n` von `src/speech/` nach `src/` verschoben (gilt für das gesamte Widget)
+
+## [1.5.0] - 2026-08-20
+
+### Changed
 
 - **Paketname:** `@elephant-webdesign-marketing-gmbh/react-accessibility-widget` → `@elephant/react-accessibility-widget`
 - **Registry:** Veröffentlichung nur noch über Verdaccio (`https://npm.elephant-agency.de`); GitHub Packages entfällt
